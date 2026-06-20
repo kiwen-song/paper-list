@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Paper Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:wght@0,500;0,600;0,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f7f5f0;
+      --surface: #ffffff;
+      --sidebar: #1c1917;
+      --sidebar-hover: #292524;
+      --sidebar-text: #d6d3d1;
+      --sidebar-muted: #78716c;
+      --text: #1c1917;
+      --text-secondary: #57534e;
+      --text-muted: #a8a29e;
+      --accent: #0f766e;
+      --accent-hover: #0d9488;
+      --accent-light: #f0fdfa;
+      --accent-muted: rgba(15,118,110,0.08);
+      --border: #e7e5e4;
+      --border-hover: #d6d3d1;
+      --rose: #be123c;
+      --rose-light: #fff1f2;
+
+      --heading: 'Lora', 'Noto Serif SC', Georgia, serif;
+      --body: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      --shadow-xs: 0 1px 2px rgba(28,25,23,0.03);
+      --shadow-sm: 0 1px 3px rgba(28,25,23,0.04), 0 1px 2px rgba(28,25,23,0.03);
+      --shadow-md: 0 4px 16px rgba(28,25,23,0.06), 0 1px 4px rgba(28,25,23,0.04);
+      --shadow-lg: 0 12px 40px rgba(28,25,23,0.08), 0 4px 12px rgba(28,25,23,0.04);
+
+      --radius: 10px;
+      --radius-sm: 6px;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      font-size: 15px;
+      display: flex;
+    }
+
+    /* ---- Sidebar ---- */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--sidebar);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0 auto 0 0;
+      padding: 24px 16px;
+      z-index: 50;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px 24px;
+      border-bottom: 1px solid #44403c;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-brand .logo {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sidebar-brand .logo svg { width: 18px; height: 18px; color: #fff; }
+
+    .sidebar-brand .brand-text { min-width: 0; }
+    .sidebar-brand .brand-title {
+      font-family: var(--heading);
+      font-size: 1rem; font-weight: 600; color: #fff;
+      line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-brand .brand-sub {
+      font-size: 0.68rem; color: var(--sidebar-muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    .nav-group { margin-bottom: 8px; }
+    .nav-label {
+      font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--sidebar-muted); padding: 8px 12px 4px; font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      color: var(--sidebar-text); text-decoration: none;
+      font-size: 0.88rem; cursor: pointer; border: none; background: none;
+      width: 100%; text-align: left; font-family: var(--body);
+      transition: background 150ms var(--ease), color 150ms var(--ease);
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+    .nav-item.active { background: var(--accent); color: #fff; }
+    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+
+    .sidebar-spacer { flex: 1; }
+
+    .sidebar-footer {
+      padding-top: 16px;
+      border-top: 1px solid #44403c;
+    }
+
+    /* ---- Main ---- */
+    .main {
+      flex: 1;
+      margin-left: 240px;
+      min-width: 0;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 40;
+    }
+
+    .topbar-title {
+      font-family: var(--heading);
+      font-size: 1.3rem; font-weight: 600;
+    }
+    .topbar-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+    .content { padding: 28px 32px 80px; max-width: 1280px; }
+
+    .section { display: none; animation: fadeIn 0.25s var(--ease); }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* ---- KPI cards ---- */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .kpi {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      box-shadow: var(--shadow-xs); transition: box-shadow 200ms var(--ease);
+    }
+    .kpi:hover { box-shadow: var(--shadow-sm); }
+    .kpi-label {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .kpi-label svg { width: 14px; height: 14px; }
+    .kpi-value {
+      font-family: var(--heading); font-size: 1.9rem; font-weight: 600;
+      font-variant-numeric: tabular-nums; line-height: 1.1;
+    }
+    .kpi-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ---- Cards / panels ---- */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow-xs);
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .panel-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .panel-title {
+      font-family: var(--heading); font-size: 1.02rem; font-weight: 600;
+    }
+    .panel-body { padding: 20px; }
+
+    /* ---- Distribution bars ---- */
+    .dist-row { margin-bottom: 14px; }
+    .dist-row:last-child { margin-bottom: 0; }
+    .dist-meta {
+      display: flex; justify-content: space-between; margin-bottom: 6px;
+      font-size: 0.82rem;
+    }
+    .dist-meta .label { color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+    .dist-meta .count { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .dist-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dist-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+    .dist-fill { height: 100%; border-radius: 4px; transition: width 0.5s var(--ease); }
+
+    /* ---- Table ---- */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-muted); padding: 12px 16px; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      font-size: 0.86rem; color: var(--text); vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    .cell-name { font-weight: 500; }
+    .cell-muted { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+    /* ---- Status badge (compact) ---- */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 500;
+      white-space: nowrap; border: none;
+    }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .b-planned { background: #f5f5f4; color: #78716c; } .b-planned::before { background: #a8a29e; }
+    .b-upcoming { background: #fef9c3; color: #854d0e; } .b-upcoming::before { background: #ca8a04; }
+    .b-in_progress { background: #dcfce7; color: #166534; } .b-in_progress::before { background: #16a34a; }
+    .b-completed { background: #f5f5f4; color: #78716c; } .b-completed::before { background: #a8a29e; }
+
+    /* status select in table */
+    .status-select {
+      appearance: none; height: 30px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--surface);
+      padding: 0 28px 0 12px; font-size: 0.78rem; font-family: var(--body);
+      cursor: pointer; color: var(--text-secondary);
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23a8a29e' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+
+    .tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;
+      white-space: nowrap;
+    }
+    .tag-national { background: #fef3c7; color: #92400e; }
+    .tag-provincial { background: #ccfbf1; color: #115e59; }
+    .tag-international { background: #fff1f2; color: #9f1239; }
+    .tag-regular { background: #f5f5f4; color: var(--text-secondary); }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 34px; padding: 0 14px; border-radius: var(--radius-sm);
+      font-family: var(--body); font-size: 0.8rem; font-weight: 500;
+      cursor: pointer; transition: all 180ms var(--ease); text-decoration: none;
+      border: 1px solid transparent; white-space: nowrap;
+    }
+    .btn svg { width: 14px; height: 14px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-ghost { background: var(--surface); color: var(--text-secondary); border-color: var(--border); }
+    .btn-ghost:hover { background: var(--bg); border-color: var(--border-hover); }
+    .btn-icon {
+      width: 32px; height: 32px; padding: 0; border-radius: var(--radius-sm);
+      background: transparent; border: 1px solid transparent; color: var(--text-muted);
+    }
+    .btn-icon:hover { background: var(--bg); color: var(--text); border-color: var(--border); }
+    .btn-icon.danger:hover { background: var(--rose-light); color: var(--rose); border-color: var(--rose); }
+    .btn-danger { background: var(--rose); color: #fff; }
+    .btn-danger:hover { background: #9f1239; }
+    .btn-sm { height: 30px; padding: 0 12px; font-size: 0.78rem; }
+
+    .upload-inline {
+      display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px;
+      border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer;
+      border: 1px dashed var(--border-hover); color: var(--text-muted); background: transparent;
+      transition: all 150ms var(--ease);
+    }
+    .upload-inline:hover { border-color: var(--accent); color: var(--accent); }
+    .upload-inline svg { width: 13px; height: 13px; }
+    .upload-inline input { display: none; }
+
+    /* ---- Forms ---- */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 6px; color: var(--text-secondary);
+    }
+    .form-group input, .form-group select {
+      width: 100%; height: 42px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0 14px;
+      font-family: var(--body); font-size: 0.9rem; background: var(--surface);
+      outline: none; transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+      color: var(--text);
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-muted);
+    }
+    .form-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 5px; }
+    .form-error { font-size: 0.76rem; color: var(--rose); margin-top: 5px; display: none; }
+    .form-error.active { display: block; }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ---- File manager ---- */
+    .file-picker {
+      display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
+    }
+    .file-picker select { flex: 1; max-width: 360px; }
+    .file-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 12px;
+    }
+    .file-row:last-child { border-bottom: none; }
+    .file-name {
+      display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;
+      font-size: 0.84rem; color: var(--text);
+    }
+    .file-name svg { width: 15px; height: 15px; color: var(--text-muted); flex-shrink: 0; }
+    .file-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-name.dir { font-weight: 500; color: var(--text-secondary); }
+    .file-meta { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .file-size { font-size: 0.78rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .empty-inline { padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.86rem; }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text); color: var(--surface);
+      padding: 12px 18px; border-radius: var(--radius); font-size: 0.85rem;
+      box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(8px);
+      transition: all 200ms var(--ease); pointer-events: none; z-index: 2000;
+    }
+    .toast.active { opacity: 1; transform: none; }
+    .toast.error { background: var(--rose); }
+    .toast.success { background: var(--accent); }
+
+    /* ---- Modal ---- */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(28,25,23,0.35);
+      backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface); border-radius: 12px; width: 100%; max-width: 460px;
+      display: flex; flex-direction: column; overflow: hidden;
+      animation: modalIn 0.2s var(--ease); box-shadow: var(--shadow-lg);
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px; border-bottom: 1px solid var(--border); gap: 12px;
+    }
+    .modal-header h2 { font-family: var(--heading); font-size: 1.1rem; font-weight: 600; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 150ms var(--ease);
+    }
+    .modal-close:hover { background: var(--bg); border-color: var(--border-hover); }
+    .modal-close svg { width: 16px; height: 16px; color: var(--text-muted); }
+    .modal-body { padding: 22px; }
+
+    .confirm-icon {
+      width: 44px; height: 44px; border-radius: 50%; background: var(--rose-light);
+      color: var(--rose); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+    }
+    .confirm-icon svg { width: 22px; height: 22px; }
+    .confirm-title { font-family: var(--heading); font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .confirm-desc { font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.6; }
+    .confirm-name {
+      background: var(--bg); padding: 10px 14px; border-radius: var(--radius-sm);
+      font-family: var(--mono); font-size: 0.82rem; margin-bottom: 18px;
+      border: 1px solid var(--border); word-break: break-all;
+    }
+
+    /* ---- Loading ---- */
+    .loading-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; z-index: 3000;
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-screen span { font-size: 0.86rem; color: var(--text-muted); }
+
+    .hidden { display: none !important; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 860px) {
+      .sidebar { transform: translateX(-100%); transition: transform 250ms var(--ease); }
+      .sidebar.open { transform: none; }
+      .main { margin-left: 0; }
+      .menu-toggle { display: flex !important; }
+    }
+    .menu-toggle {
+      display: none; width: 36px; height: 36px; align-items: center; justify-content: center;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+      cursor: pointer; color: var(--text-secondary);
+    }
+    .menu-toggle svg { width: 18px; height: 18px; }
+    .backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(28,25,23,0.3);
+      z-index: 45;
+    }
+    .backdrop.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <span id="loadingText">Checking access…</span>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+      <div class="brand-text">
+        <div class="brand-title" id="brandTitle">Paper Archive</div>
+        <div class="brand-sub">Admin Console</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Manage</div>
+      <button class="nav-item active" data-section="overview" onclick="showSection('overview')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Overview
+      </button>
+      <button class="nav-item" data-section="competitions" onclick="showSection('competitions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Competitions
+      </button>
+      <button class="nav-item" data-section="files" onclick="showSection('files')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Files
+      </button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">System</div>
+      <button class="nav-item" data-section="settings" onclick="showSection('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <a class="nav-item" href="/" >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        View Site
+      </a>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-footer">
+      <button class="nav-item" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop" onclick="closeSidebar()"></div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+        <button class="menu-toggle" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <div style="min-width:0;">
+          <div class="topbar-title" id="topbarTitle">Overview</div>
+          <div class="topbar-sub" id="topbarSub">System summary at a glance</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openCreate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Overview -->
+      <div class="section active" id="sec-overview">
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;" class="panels-row">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">Status Distribution</div></div>
+            <div class="panel-body" id="statusDist"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">Awards by Level</div></div>
+            <div class="panel-body" id="awardDist"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Recently Updated</div></div>
+          <div class="panel-body" style="padding:0;">
+            <table>
+              <thead><tr><th>Competition</th><th>Status</th><th>Files</th><th>Updated</th></tr></thead>
+              <tbody id="recentBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Competitions -->
+      <div class="section" id="sec-competitions">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">All Competitions</div>
+            <input type="text" id="compSearch" placeholder="Filter…" oninput="renderComps()"
+              style="height:34px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0 12px; font-size:0.84rem; outline:none; width:220px;">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Name</th><th>Status</th><th>Tags</th><th>Files</th><th>Updated</th><th style="text-align:right;">Actions</th>
+              </tr></thead>
+              <tbody id="compBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Files -->
+      <div class="section" id="sec-files">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">File Browser</div></div>
+          <div class="panel-body">
+            <div class="file-picker">
+              <select id="fileCompSelect" onchange="loadFiles()" style="height:38px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0 12px; font-size:0.86rem; background:var(--surface); outline:none; min-width:280px;">
+                <option value="">Select a competition…</option>
+              </select>
+              <label class="upload-inline" id="fileUploadLabel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload ZIP
+                <input type="file" accept=".zip" onchange="uploadToSelected(this)">
+              </label>
+            </div>
+            <div id="fileListArea"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="section" id="sec-settings">
+        <div class="panel" style="max-width:560px;">
+          <div class="panel-header"><div class="panel-title">Site Appearance</div></div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label>Site Title</label>
+              <input type="text" id="setTitle" placeholder="Modeling Papers">
+              <div class="form-hint">Shown as the heading on the public homepage.</div>
+            </div>
+            <div class="form-group">
+              <label>Site Subtitle</label>
+              <input type="text" id="setSubtitle" placeholder="Mathematical Modeling Competition Collection">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save Appearance</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="max-width:560px;">
+          <div class="panel-header"><div class="panel-title">Change Password</div></div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="oldPw" autocomplete="current-password">
+              <div class="form-error" id="oldPwErr">Wrong current password</div>
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="newPw" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirmPw" autocomplete="new-password">
+              <div class="form-error" id="confirmPwErr">Passwords do not match</div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary btn-sm" onclick="changePassword()">Update Password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Create modal -->
+  <div class="modal-overlay" id="createOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>New Competition</h2>
+        <button class="modal-close" onclick="closeCreate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Competition Name</label>
+          <input type="text" id="createName" placeholder="e.g. 2026 CUMCM">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="createStatus">
+            <option value="planned">Planned</option>
+            <option value="upcoming">Coming Soon</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Upload Paper Package (optional .zip)</label>
+          <label class="upload-inline" style="height:42px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span id="createUploadText">Select ZIP file</span>
+            <input type="file" accept=".zip" onchange="document.getElementById('createUploadText').textContent = this.files.length ? this.files[0].name : 'Select ZIP file'">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="closeCreate()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitCreate()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm delete modal -->
+  <div class="modal-overlay" id="confirmOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="confirmHeading">Delete</h2>
+        <button class="modal-close" onclick="closeConfirm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></div>
+        <div class="confirm-title" id="confirmTitle">This action cannot be undone</div>
+        <div class="confirm-desc" id="confirmDesc">This item will be permanently removed.</div>
+        <div class="confirm-name" id="confirmName"></div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancel</button>
+          <button class="btn btn-danger btn-sm" onclick="runConfirm()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STATUS = {
+      planned: { label: 'Planned', cls: 'b-planned', dot: '#a8a29e' },
+      upcoming: { label: 'Coming Soon', cls: 'b-upcoming', dot: '#ca8a04' },
+      in_progress: { label: 'In Progress', cls: 'b-in_progress', dot: '#16a34a' },
+      completed: { label: 'Completed', cls: 'b-completed', dot: '#a8a29e' },
+    };
+    const LEVEL = { national: 'National', provincial: 'Provincial', international: 'International' };
+
+    let comps = [];
+    let stats = null;
+    let confirmAction = null; // { kind, ...payload }
+    let currentFileComp = '';
+
+    // ---- helpers ----
+    const $ = id => document.getElementById(id);
+    const enc = s => encodeURIComponent(s);
+    function fmtBytes(n) {
+      if (n < 1024) return n + ' B';
+      const u = ['KB','MB','GB','TB']; let i = -1; let v = n;
+      do { v /= 1024; i++; } while (v >= 1024 && i < u.length - 1);
+      return v.toFixed(v >= 100 ? 0 : 1) + ' ' + u[i];
+    }
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      if (isNaN(d)) return '—';
+      return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+    }
+    function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    let toastTimer;
+    function toast(msg, type='') {
+      const t = $('toast'); t.textContent = msg; t.className = 'toast active ' + type;
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('active'), 2400);
+    }
+
+    // ---- access guard ----
+    async function guard() {
+      try {
+        const res = await fetch('/api/auth'); const data = await res.json();
+        if (!data.admin) {
+          $('loadingText').textContent = 'Redirecting to login…';
+          window.location.href = '/#login';
+          // Fallback in case hash route isn't wired; go home and the user signs in there.
+          setTimeout(() => { window.location.href = '/'; }, 1500);
+          return false;
+        }
+      } catch (e) {
+        $('loadingText').textContent = 'Connection error';
+        return false;
+      }
+      $('loadingScreen').classList.add('hidden');
+      return true;
+    }
+
+    // ---- nav ----
+    const TITLES = {
+      overview: ['Overview', 'System summary at a glance'],
+      competitions: ['Competitions', 'Create, edit, and remove entries'],
+      files: ['Files', 'Browse and manage individual files'],
+      settings: ['Settings', 'Site appearance and account'],
+    };
+    function showSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      $('sec-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item[data-section]').forEach(n => n.classList.toggle('active', n.dataset.section === name));
+      const [t, sub] = TITLES[name] || ['', ''];
+      $('topbarTitle').textContent = t; $('topbarSub').textContent = sub;
+      closeSidebar();
+    }
+
+    function toggleSidebar() { $('sidebar').classList.toggle('open'); $('backdrop').classList.toggle('active'); }
+    function closeSidebar() { $('sidebar').classList.remove('open'); $('backdrop').classList.remove('active'); }
+
+    // ---- data ----
+    async function loadAll() {
+      const [cRes, sRes, setRes] = await Promise.all([
+        fetch('/api/competitions'), fetch('/api/stats'), fetch('/api/settings')
+      ]);
+      comps = await cRes.json();
+      stats = await sRes.json();
+      const settings = await setRes.json();
+      $('brandTitle').textContent = settings.title || 'Paper Archive';
+      $('setTitle').value = settings.title || '';
+      $('setSubtitle').value = settings.subtitle || '';
+      renderOverview();
+      renderComps();
+      populateFileSelect();
+    }
+
+    // ---- overview ----
+    function renderOverview() {
+      if (!stats) return;
+      const awarded = (stats.byAwardLevel ? Object.values(stats.byAwardLevel) : []).reduce((a,b)=>a+b,0);
+      $('kpiGrid').innerHTML = kpiCard('Competitions', stats.totalCompetitions, 'total entries', 'book') +
+        kpiCard('Files', stats.totalFiles, 'across all entries', 'file') +
+        kpiCard('Storage', fmtBytes(stats.totalSize), 'disk used', 'database') +
+        kpiCard('Awarded', awarded, 'have an award tag', 'award');
+
+      $('statusDist').innerHTML = distBars(stats.byStatus || {}, STATUS);
+      const levels = { national:'National', provincial:'Provincial', international:'International' };
+      const lvlColors = { national:'#d97706', provincial:'#14b8a6', international:'#f43f5e' };
+      $('awardDist').innerHTML = distBars(stats.byAwardLevel || {}, levels, lvlColors) || '<div class="empty-inline">No award tags yet.</div>';
+
+      const rows = (stats.recentUpdated || []).map(c => `
+        <tr style="cursor:pointer" onclick="showSection('files')">
+          <td class="cell-name">${esc(c.name)}</td>
+          <td><span class="badge ${(STATUS[c.status]||STATUS.completed).cls}">${(STATUS[c.status]||STATUS.completed).label}</span></td>
+          <td class="cell-muted">${c.fileCount}</td>
+          <td class="cell-muted">${fmtDate(c.modifiedTime)}</td>
+        </tr>`).join('');
+      $('recentBody').innerHTML = rows || '<tr><td colspan="4" class="empty-inline">No data</td></tr>';
+    }
+
+    function kpiCard(label, value, hint, icon) {
+      const icons = {
+        book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+        file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+        database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+        award: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.111"/>',
+      };
+      return `<div class="kpi">
+        <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icons[icon]||''}</svg> ${label}</div>
+        <div class="kpi-value">${value}</div>
+        <div class="kpi-hint">${hint}</div>
+      </div>`;
+    }
+
+    function distBars(map, meta, colors) {
+      const total = Object.values(map).reduce((a,b)=>a+b,0);
+      if (total === 0) return '';
+      const entries = Object.entries(map).filter(([k,v]) => v > 0);
+      if (!entries.length) return '';
+      return entries.map(([k,v]) => {
+        const m = meta[k] || { label: k, dot: '#a8a29e', cls: '' };
+        const dotColor = colors ? colors[k] : (m.dot || '#a8a29e');
+        const pct = total ? (v / total * 100) : 0;
+        return `<div class="dist-row">
+          <div class="dist-meta">
+            <span class="label"><span class="dist-dot" style="background:${dotColor}"></span>${esc(m.label || k)}</span>
+            <span class="count">${v}</span>
+          </div>
+          <div class="dist-track"><div class="dist-fill" style="width:${pct}%; background:${dotColor}"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    // ---- competitions table ----
+    function renderComps() {
+      const q = ($('compSearch').value || '').toLowerCase().trim();
+      let list = comps.slice().sort((a,b)=> new Date(b.modifiedTime) - new Date(a.modifiedTime));
+      if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+      if (!list.length) {
+        $('compBody').innerHTML = '<tr><td colspan="6" class="empty-inline">No competitions found.</td></tr>';
+        return;
+      }
+      $('compBody').innerHTML = list.map(c => compRow(c)).join('');
+    }
+
+    function compRow(c) {
+      const e = enc(c.name);
+      const st = STATUS[c.status] || STATUS.completed;
+      const tags = (c.tags||[]).map(t => {
+        if (t.isAward) return `<span class="tag tag-${t.level||'national'}">${esc(t.text)}</span>`;
+        return `<span class="tag tag-regular">${esc(t.text)}</span>`;
+      }).join(' ') || '<span class="cell-muted">—</span>';
+      return `<tr>
+        <td class="cell-name">${esc(c.name)}</td>
+        <td>
+          <select class="status-select" onchange="setStatus('${e}', this.value)">
+            ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${c.status===k?'selected':''}>${v.label}</option>`).join('')}
+          </select>
+        </td>
+        <td>${tags}</td>
+        <td class="cell-muted">${c.fileCount}</td>
+        <td class="cell-muted">${fmtDate(c.modifiedTime)}</td>
+        <td>
+          <div class="row-actions">
+            ${c.hasThesis ? `<button class="btn-icon" title="View paper" onclick="viewPDF('${e}','${esc(c.name)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>` : ''}
+            <a class="btn-icon" title="Download ZIP" href="/api/competitions/${e}/download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>
+            <button class="btn-icon danger" title="Delete" onclick="askDeleteComp('${e}','${esc(c.name)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    async function setStatus(e, status) {
+      await fetch(`/api/competitions/${e}/status`, {
+        method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status })
+      });
+      const c = comps.find(c => enc(c.name) === e); if (c) c.status = status;
+      toast('Status updated', 'success');
+    }
+
+    function viewPDF(e, name) { window.open(`/api/competitions/${e}/pdf`, '_blank'); }
+
+    function askDeleteComp(e, name) {
+      confirmAction = { kind: 'comp', enc: e };
+      $('confirmHeading').textContent = 'Delete Competition';
+      $('confirmTitle').textContent = 'This action cannot be undone';
+      $('confirmDesc').textContent = 'All files, the paper, and metadata for this competition will be permanently removed.';
+      $('confirmName').textContent = name;
+      $('confirmOverlay').classList.add('active');
+    }
+
+    function openCreate() {
+      $('createName').value = ''; $('createStatus').value = 'planned';
+      $('createUploadText').textContent = 'Select ZIP file';
+      $('createOverlay').classList.add('active');
+      setTimeout(()=>$('createName').focus(), 80);
+    }
+    function closeCreate() { $('createOverlay').classList.remove('active'); }
+
+    async function submitCreate() {
+      const name = $('createName').value.trim();
+      if (!name) return;
+      const res = await fetch('/api/competitions', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ name, status: $('createStatus').value })
+      });
+      if (!res.ok) { const err = await res.json().catch(()=>({})); toast(err.error || 'Failed to create', 'error'); return; }
+      const fileInput = document.querySelector('#createOverlay input[type=file]');
+      if (fileInput && fileInput.files.length) {
+        const fd = new FormData(); fd.append('file', fileInput.files[0]);
+        await fetch(`/api/competitions/${enc(name)}/upload`, { method:'POST', body: fd });
+      }
+      closeCreate(); toast('Competition created', 'success'); await loadAll();
+    }
+
+    // ---- files ----
+    function populateFileSelect() {
+      const sel = $('fileCompSelect');
+      const cur = currentFileComp;
+      sel.innerHTML = '<option value="">Select a competition…</option>' +
+        comps.map(c => `<option value="${enc(c.name)}">${esc(c.name)}</option>`).join('');
+      if (cur && comps.some(c => enc(c.name) === cur)) sel.value = cur;
+    }
+
+    async function loadFiles() {
+      currentFileComp = $('fileCompSelect').value;
+      const area = $('fileListArea');
+      if (!currentFileComp) { area.innerHTML = ''; return; }
+      area.innerHTML = '<div class="empty-inline">Loading…</div>';
+      const res = await fetch(`/api/competitions/${currentFileComp}/files`);
+      if (!res.ok) { area.innerHTML = '<div class="empty-inline">Failed to load.</div>'; return; }
+      const files = await res.json();
+      const dirs = files.filter(f => f.isDir).sort((a,b)=>a.path.localeCompare(b.path));
+      const regular = files.filter(f => !f.isDir).sort((a,b)=>a.path.localeCompare(b.path));
+      if (!regular.length && !dirs.length) {
+        area.innerHTML = '<div class="empty-inline">No files in this competition.</div>'; return;
+      }
+      const icon = (isDir) => isDir
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      const row = (f) => `<div class="file-row">
+        <div class="file-name ${f.isDir?'dir':''}">${icon(f.isDir)}<span>${esc(f.path)}</span></div>
+        <div class="file-meta">
+          <span class="file-size">${f.isDir ? '—' : fmtBytes(f.size)}</span>
+          ${f.isDir ? '' : `<button class="btn-icon danger" title="Delete file" onclick="askDeleteFile('${currentFileComp}','${enc(f.path)}','${esc(f.path)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`}
+        </div>
+      </div>`;
+      area.innerHTML = rowList([...dirs, ...regular], row);
+    }
+    function rowList(arr, fn) { return arr.map(fn).join(''); }
+
+    function askDeleteFile(compEnc, pathEnc, pathDisplay) {
+      confirmAction = { kind: 'file', compEnc, pathEnc };
+      $('confirmHeading').textContent = 'Delete File';
+      $('confirmTitle').textContent = 'This file will be permanently removed.';
+      $('confirmDesc').textContent = '';
+      $('confirmName').textContent = pathDisplay;
+      $('confirmOverlay').classList.add('active');
+    }
+
+    async function uploadToSelected(input) {
+      if (!input.files.length) return;
+      if (!currentFileComp) { toast('Select a competition first', 'error'); input.value=''; return; }
+      const fd = new FormData(); fd.append('file', input.files[0]);
+      toast('Uploading…');
+      await fetch(`/api/competitions/${currentFileComp}/upload`, { method:'POST', body: fd });
+      input.value = '';
+      toast('Upload complete', 'success');
+      await loadFiles();
+      // refresh counts
+      const c = await fetch('/api/competitions'); comps = await c.json();
+      populateFileSelect(); $('fileCompSelect').value = currentFileComp;
+    }
+
+    // ---- confirm runner ----
+    async function runConfirm() {
+      const a = confirmAction; closeConfirm();
+      if (!a) return;
+      if (a.kind === 'comp') {
+        const res = await fetch(`/api/competitions/${a.enc}`, { method:'DELETE' });
+        if (!res.ok) { toast('Failed to delete', 'error'); return; }
+        toast('Competition deleted', 'success'); await loadAll();
+      } else if (a.kind === 'file') {
+        const res = await fetch(`/api/competitions/${a.compEnc}/files/${a.pathEnc}`, { method:'DELETE' });
+        if (!res.ok) { toast('Failed to delete file', 'error'); return; }
+        toast('File deleted', 'success'); await loadFiles();
+      }
+    }
+    function closeConfirm() { $('confirmOverlay').classList.remove('active'); confirmAction = null; }
+
+    // ---- settings ----
+    async function saveSettings() {
+      const title = $('setTitle').value.trim();
+      const subtitle = $('setSubtitle').value.trim();
+      if (!title) { toast('Title cannot be empty', 'error'); return; }
+      const res = await fetch('/api/settings', {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ title, subtitle })
+      });
+      if (!res.ok) { toast('Failed to save', 'error'); return; }
+      $('brandTitle').textContent = title;
+      toast('Settings saved', 'success');
+    }
+
+    async function changePassword() {
+      const oldPw = $('oldPw').value, newPw = $('newPw').value, confirmPw = $('confirmPw').value;
+      $('oldPwErr').classList.remove('active'); $('confirmPwErr').classList.remove('active');
+      if (!newPw || newPw !== confirmPw) { $('confirmPwErr').classList.add('active'); return; }
+      const res = await fetch('/api/change-password', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ oldPassword: oldPw, newPassword: newPw })
+      });
+      if (res.status === 401) { $('oldPwErr').classList.add('active'); return; }
+      if (!res.ok) { toast('Failed to change password', 'error'); return; }
+      $('oldPw').value = ''; $('newPw').value = ''; $('confirmPw').value = '';
+      toast('Password changed. Please sign in again.', 'success');
+      setTimeout(() => window.location.href = '/', 1200);
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method:'POST' });
+      window.location.href = '/';
+    }
+
+    // ---- wire ----
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.modal-overlay') && e.target === e.currentTarget) {
+        closeCreate(); closeConfirm();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closeCreate(); closeConfirm(); closeSidebar(); }
+    });
+    $('createName') && $('createName').addEventListener('keydown', e => { if (e.key === 'Enter') submitCreate(); });
+
+    (async () => {
+      const ok = await guard();
+      if (!ok) return;
+      await loadAll();
+    })();
+  </script>
+</body>
+</html>

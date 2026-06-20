@@ -1,0 +1,22 @@
+[Unit]
+Description=Paper Archive Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/paper-server
+ExecStart=/opt/paper-server/paper-server
+Restart=on-failure
+RestartSec=3
+User=www-data
+Group=www-data
+Environment=PORT=3000
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/paper-server
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

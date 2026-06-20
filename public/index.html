@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f7f5f0;
+      --surface: #ffffff;
+      --text: #1c1917;
+      --text-secondary: #57534e;
+      --text-muted: #a8a29e;
+      --accent: #0f766e;
+      --accent-hover: #0d9488;
+      --accent-light: #f0fdfa;
+      --accent-muted: rgba(15,118,110,0.08);
+      --border: #e7e5e4;
+      --border-hover: #d6d3d1;
+      --warm: #fef3c7;
+      --warm-text: #92400e;
+      --rose: #be123c;
+      --rose-light: #fff1f2;
+
+      --heading: 'Lora', 'Noto Serif SC', Georgia, serif;
+      --body: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+      --shadow-xs: 0 1px 2px rgba(28,25,23,0.03);
+      --shadow-sm: 0 1px 3px rgba(28,25,23,0.04), 0 1px 2px rgba(28,25,23,0.03);
+      --shadow-md: 0 4px 16px rgba(28,25,23,0.06), 0 1px 4px rgba(28,25,23,0.04);
+      --shadow-lg: 0 12px 40px rgba(28,25,23,0.08), 0 4px 12px rgba(28,25,23,0.04);
+
+      --radius: 10px;
+      --radius-sm: 6px;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* ---- Header ---- */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 24px 24px;
+      text-align: center;
+    }
+
+    .header-label {
+      display: inline-block;
+      font-family: var(--body);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-muted);
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    header h1 {
+      font-family: var(--heading);
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    header h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .header-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 16px;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-number {
+      font-family: var(--heading);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text);
+      display: block;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ---- Container ---- */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 28px 80px;
+    }
+
+    /* ---- Toolbar ---- */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .search-bar {
+      flex: 1;
+      min-width: 200px;
+      height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+    }
+
+    .search-bar:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-muted);
+    }
+
+    .search-bar svg { width: 17px; height: 17px; color: var(--text-muted); flex-shrink: 0; }
+
+    .search-bar input {
+      border: none; outline: none;
+      font-family: var(--body); font-size: 0.9rem;
+      width: 100%; background: transparent; color: var(--text);
+    }
+
+    .search-bar input::placeholder { color: var(--text-muted); }
+
+    .filter-btn, .create-btn {
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 18px;
+      border-radius: var(--radius);
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      white-space: nowrap;
+    }
+
+    .filter-btn {
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .filter-btn:hover { border-color: var(--border-hover); background: var(--bg); }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .create-btn {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+    }
+
+    .create-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    .filter-btn svg, .create-btn svg { width: 16px; height: 16px; }
+
+    /* ---- Sort Dropdown ---- */
+    .sort-wrap { position: relative; }
+
+    .sort-btn {
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 14px;
+      border-radius: var(--radius);
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      white-space: nowrap;
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .sort-btn:hover { border-color: var(--border-hover); background: var(--bg); }
+    .sort-btn svg { width: 16px; height: 16px; }
+
+    .sort-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 4px;
+      z-index: 100;
+      min-width: 180px;
+    }
+
+    .sort-menu.active { display: block; }
+
+    .sort-menu .menu-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 6px 12px 4px;
+      font-weight: 600;
+    }
+
+    .sort-menu button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      background: none;
+      font-family: var(--body);
+      font-size: 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 150ms var(--ease);
+      color: var(--text);
+    }
+
+    .sort-menu button:hover { background: var(--bg); }
+
+    .sort-menu button.active {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .sort-menu button .check {
+      width: 14px;
+      height: 14px;
+      margin-left: auto;
+      color: var(--accent);
+      visibility: hidden;
+    }
+
+    .sort-menu button.active .check { visibility: visible; }
+
+    /* ---- Section Label ---- */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-label span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ---- Grid ---- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 20px;
+    }
+
+    /* ---- Card ---- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      transition: box-shadow 250ms var(--ease), border-color 250ms var(--ease), transform 250ms var(--ease);
+      box-shadow: var(--shadow-xs);
+      animation: cardIn 0.35s var(--ease) both;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-inner { padding: 22px 24px 20px; }
+
+    /* Top accent stripe */
+    .card-accent {
+      height: 3px;
+      background: transparent;
+      transition: background 200ms var(--ease);
+    }
+
+    .card.has-accent .card-accent { background: var(--accent); }
+    .card.has-gold .card-accent { background: linear-gradient(90deg, #b45309, #d97706); }
+    .card.has-provincial .card-accent { background: linear-gradient(90deg, #0f766e, #14b8a6); }
+    .card.has-international .card-accent { background: linear-gradient(90deg, #be123c, #f43f5e); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-family: var(--heading);
+      font-size: 1.08rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text);
+      flex: 1;
+    }
+
+    /* ---- Status Badge ---- */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 150ms var(--ease);
+      flex-shrink: 0;
+      white-space: nowrap;
+      position: relative;
+      border: none;
+      letter-spacing: 0.02em;
+    }
+
+    .status-badge:hover { opacity: 0.85; }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-planned { background: #f5f5f4; color: #78716c; }
+    .status-planned::before { background: #a8a29e; }
+
+    .status-upcoming { background: #fef9c3; color: #854d0e; }
+    .status-upcoming::before { background: #ca8a04; }
+
+    .status-in_progress { background: #dcfce7; color: #166534; }
+    .status-in_progress::before { background: #16a34a; animation: pulse 2s infinite; }
+
+    .status-completed { background: #f5f5f4; color: #78716c; }
+    .status-completed::before { background: #a8a29e; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-selector {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg);
+      padding: 4px;
+      z-index: 100;
+      min-width: 150px;
+    }
+
+    .status-selector.active { display: block; }
+
+    .status-option {
+      display: block;
+      width: 100%;
+      padding: 7px 12px;
+      border: none;
+      background: none;
+      font-family: var(--body);
+      font-size: 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 150ms var(--ease);
+      color: var(--text);
+    }
+
+    .status-option:hover { background: var(--bg); }
+
+    /* ---- Tags ---- */
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      min-height: 26px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      line-height: 1.6;
+      white-space: nowrap;
+      position: relative;
+      border: none;
+    }
+
+    .tag .tag-remove {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1;
+      color: inherit;
+      opacity: 0.5;
+    }
+
+    .tag:hover .tag-remove { display: inline; }
+    .tag .tag-remove:hover { opacity: 1; }
+
+    .tag-national { background: #fef3c7; color: #92400e; }
+    .tag-provincial { background: #ccfbf1; color: #115e59; }
+    .tag-international { background: #fff1f2; color: #9f1239; }
+    .tag-regular { background: #f5f5f4; color: var(--text-secondary); }
+
+    .tag-level {
+      font-size: 0.65rem;
+      opacity: 0.65;
+      margin-left: 1px;
+    }
+
+    .add-tag-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      border: 1px dashed var(--border-hover);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 150ms var(--ease);
+      line-height: 1.6;
+    }
+
+    .add-tag-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-muted); }
+
+    .tag-popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 14px;
+      z-index: 100;
+      width: 280px;
+    }
+
+    .tag-popover.active { display: block; }
+
+    .tag-popover-levels {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tag-level-btn {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: var(--body);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 150ms var(--ease);
+      color: var(--text-secondary);
+    }
+
+    .tag-level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tag-level-btn:hover:not(.active) { background: var(--bg); }
+
+    .tag-popover-input { display: flex; gap: 6px; }
+
+    .tag-popover-input input {
+      flex: 1;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      font-family: var(--body);
+      font-size: 0.9rem;
+      background: var(--surface);
+      outline: none;
+      transition: border-color 200ms var(--ease);
+      color: var(--text);
+    }
+
+    .tag-popover-input input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-muted); }
+
+    .tag-popover-input button {
+      height: 36px;
+      padding: 0 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms var(--ease);
+    }
+
+    .tag-popover-input button:hover { background: var(--accent-hover); }
+
+    /* ---- Card meta & actions ---- */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .card-meta svg { width: 14px; height: 14px; }
+
+    .card-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 16px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      text-decoration: none;
+      border: none;
+      letter-spacing: 0.01em;
+    }
+
+    .btn svg { width: 15px; height: 15px; }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg); border-color: var(--border-hover); }
+
+    .btn-sm { height: 32px; padding: 0 14px; font-size: 0.8rem; }
+
+    .upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      border: 1px dashed var(--border-hover);
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .upload-label:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-muted); }
+    .upload-label svg { width: 15px; height: 15px; }
+    .upload-label input { display: none; }
+
+    /* ---- Modals ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(28,25,23,0.35);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 960px;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalIn 0.2s var(--ease);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .modal-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .modal-header h2 {
+      font-family: var(--heading);
+      font-size: 1.1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .modal-header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .modal-close {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 150ms var(--ease);
+    }
+
+    .modal-close:hover { background: var(--bg); border-color: var(--border-hover); }
+    .modal-close svg { width: 16px; height: 16px; color: var(--text-muted); }
+
+    .modal-body { flex: 1; overflow: hidden; }
+    .modal-body iframe { width: 100%; height: 100%; border: none; }
+
+    .file-list {
+      padding: 0 24px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .file-list summary {
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 0;
+      user-select: none;
+    }
+
+    .file-list ul {
+      list-style: none;
+      padding: 4px 0 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .file-list li {
+      background: var(--bg);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    /* ---- Create Modal ---- */
+    .create-modal {
+      max-width: 480px;
+      height: auto;
+    }
+
+    .create-modal .modal-body { padding: 24px; overflow: visible; }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-family: var(--body);
+      font-size: 0.9rem;
+      background: var(--surface);
+      outline: none;
+      transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+      color: var(--text);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-muted);
+    }
+
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23a8a29e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    .upload-label-create {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      padding: 0 16px;
+      border: 1px dashed var(--border-hover);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      color: var(--text-muted);
+    }
+
+    .upload-label-create:hover { border-color: var(--accent); color: var(--accent); }
+    .upload-label-create svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .upload-label-create input { display: none; }
+
+    /* ---- Admin Button & Indicator ---- */
+    .admin-btn {
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 16px;
+      border-radius: var(--radius);
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      white-space: nowrap;
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .admin-btn:hover { border-color: var(--border-hover); background: var(--bg); }
+    .admin-btn svg { width: 16px; height: 16px; }
+
+    .admin-btn.logged-in { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .admin-btn.logged-in:hover { background: var(--accent-muted); }
+
+    .admin-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .admin-btn.logged-in .admin-dot { background: var(--accent); }
+
+    .admin-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 4px;
+      z-index: 100;
+      min-width: 180px;
+    }
+
+    .admin-menu.active { display: block; }
+
+    .admin-menu button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 12px;
+      border: none;
+      background: none;
+      font-family: var(--body);
+      font-size: 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 150ms var(--ease);
+      color: var(--text);
+    }
+
+    .admin-menu button:hover { background: var(--bg); }
+    .admin-menu button svg { width: 15px; height: 15px; color: var(--text-muted); }
+
+    .admin-menu .menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .admin-menu .menu-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 6px 12px 4px;
+      font-weight: 600;
+    }
+
+    /* ---- Login & Settings Modal ---- */
+    .small-modal {
+      max-width: 420px;
+      height: auto;
+    }
+
+    .small-modal .modal-body { padding: 24px; overflow: visible; }
+
+    .form-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .form-error {
+      font-size: 0.78rem;
+      color: var(--rose);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .form-error.active { display: block; }
+
+    /* ---- Delete Button on Card ---- */
+    .card-delete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 150ms var(--ease);
+      z-index: 5;
+      padding: 0;
+    }
+
+    .card-delete-btn svg { width: 14px; height: 14px; }
+    .card-delete-btn:hover { background: var(--rose-light); color: var(--rose); border-color: var(--rose); }
+
+    body.admin-mode .card-delete-btn { display: flex; }
+
+    /* ---- Confirm Modal ---- */
+    .confirm-modal {
+      max-width: 420px;
+      height: auto;
+    }
+
+    .confirm-modal .modal-body { padding: 24px; overflow: visible; }
+
+    .confirm-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--rose-light);
+      color: var(--rose);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .confirm-icon svg { width: 24px; height: 24px; }
+
+    .confirm-title {
+      font-family: var(--heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .confirm-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .confirm-name {
+      background: var(--bg);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.85rem;
+      color: var(--text);
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      word-break: break-all;
+    }
+
+    .btn-danger { background: var(--rose); color: #fff; }
+    .btn-danger:hover { background: #9f1239; }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text);
+      color: var(--surface);
+      padding: 12px 18px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 200ms var(--ease);
+      pointer-events: none;
+      z-index: 2000;
+    }
+
+    .toast.active { opacity: 1; transform: translateY(0); }
+    .toast.error { background: var(--rose); }
+    .toast.success { background: var(--accent); }
+
+    /* ---- Empty State ---- */
+    .empty-state { text-align: center; padding: 80px 24px; }
+
+    .empty-state svg { width: 48px; height: 48px; margin-bottom: 16px; color: var(--border-hover); }
+
+    .empty-state h3 {
+      font-family: var(--heading);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .empty-state p { font-size: 0.9rem; color: var(--text-muted); }
+
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer span { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.06em; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      header { padding: 22px 20px 20px; }
+      header h1 { font-size: 1.6rem; }
+      .stats-bar { gap: 28px; }
+      .stat-number { font-size: 1.2rem; }
+      .grid { grid-template-columns: 1fr; gap: 16px; }
+      .container { padding: 18px 20px 60px; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .modal { max-width: 100%; height: 95vh; }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.4rem; }
+      .header-sub { display: none; }
+      .stats-bar { flex-direction: row; align-items: center; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-label">Paper Archive</div>
+    <h1>Modeling <em>Papers</em></h1>
+    <div class="header-sub">Mathematical Modeling Competition Collection</div>
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-number" id="totalCount">0</span>
+        <span class="stat-label">Papers</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number" id="totalFiles">0</span>
+        <span class="stat-label">Files</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="toolbar">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search competitions...">
+      </div>
+      <button class="filter-btn" id="filterAwardBtn" onclick="toggleAwardFilter()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        Awarded Only
+      </button>
+      <div class="sort-wrap">
+        <button class="sort-btn" onclick="toggleSortMenu(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M6 12h12"/><path d="M9 18h6"/></svg>
+          <span id="sortLabel">Newest</span>
+        </button>
+        <div class="sort-menu" id="sortMenu"></div>
+      </div>
+      <button class="create-btn admin-only" id="createBtn" onclick="showCreateModal()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Competition
+      </button>
+      <div style="position:relative">
+        <button class="admin-btn" id="adminBtn" onclick="toggleAdminMenu(event)">
+          <span class="admin-dot"></span>
+          <span id="adminBtnLabel">Admin</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="admin-menu" id="adminMenu"></div>
+      </div>
+    </div>
+
+    <div class="section-label">
+      <span id="sectionLabel">All Papers</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+      <h3>No Papers Yet</h3>
+      <p>Click "New Competition" to get started</p>
+    </div>
+  </div>
+
+  <footer><span>Mathematical Modeling Paper Archive</span></footer>
+
+  <!-- PDF Viewer Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h2 id="modalTitle">Paper Preview</h2>
+        </div>
+        <div class="modal-header-actions">
+          <a class="btn btn-primary btn-sm" id="modalDownload" href="#" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+          <button class="modal-close" id="modalClose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <details class="file-list" id="fileList">
+        <summary>Attachments</summary>
+        <ul id="fileListItems"></ul>
+      </details>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Create Competition Modal -->
+  <div class="modal-overlay" id="createOverlay">
+    <div class="modal create-modal">
+      <div class="modal-header">
+        <div class="modal-title-group"><h2>New Competition</h2></div>
+        <button class="modal-close" onclick="hideCreateModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Competition Name</label>
+          <input type="text" id="createName" placeholder="e.g. 2025 MCM/ICM">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="createStatus">
+            <option value="planned">Planned</option>
+            <option value="upcoming">Coming Soon</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Upload Paper Package (optional .zip)</label>
+          <label class="upload-label-create" id="createUploadLabel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span id="createUploadText">Select ZIP file</span>
+            <input type="file" id="createFile" accept=".zip" onchange="onCreateFileChange()">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="hideCreateModal()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitCreate()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginOverlay">
+    <div class="modal small-modal">
+      <div class="modal-header">
+        <div class="modal-title-group"><h2>Admin Login</h2></div>
+        <button class="modal-close" onclick="hideLoginModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter admin password" autocomplete="current-password">
+          <div class="form-hint">Default password is <code>admin</code>. You can change it in Settings.</div>
+          <div class="form-error" id="loginError">Wrong password</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="hideLoginModal()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitLogin()">Sign In</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsOverlay">
+    <div class="modal small-modal">
+      <div class="modal-header">
+        <div class="modal-title-group"><h2>Change Password</h2></div>
+        <button class="modal-close" onclick="hideSettingsModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="oldPassword" placeholder="Current password" autocomplete="current-password">
+          <div class="form-error" id="oldPasswordError">Wrong current password</div>
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="newPassword" placeholder="New password" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm new password" autocomplete="new-password">
+          <div class="form-error" id="confirmError">Passwords do not match</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="hideSettingsModal()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitChangePassword()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div class="modal-overlay" id="confirmOverlay">
+    <div class="modal confirm-modal">
+      <div class="modal-header">
+        <div class="modal-title-group"><h2>Delete Competition</h2></div>
+        <button class="modal-close" onclick="hideConfirmModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </div>
+        <div class="confirm-title">This action cannot be undone</div>
+        <div class="confirm-desc">All files, paper, and metadata for this competition will be permanently removed.</div>
+        <div class="confirm-name" id="confirmName"></div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="hideConfirmModal()">Cancel</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Delete Forever</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STATUS_MAP = {
+      planned: { label: 'Planned', cls: 'status-planned' },
+      upcoming: { label: 'Coming Soon', cls: 'status-upcoming' },
+      in_progress: { label: 'In Progress', cls: 'status-in_progress' },
+      completed: { label: 'Completed', cls: 'status-completed' },
+    };
+
+    const LEVEL_LABELS = { national: 'National', provincial: 'Provincial', international: 'International' };
+
+    let competitions = [];
+    let awardFilterActive = false;
+    let isAdmin = false;
+    let pendingDelete = null;
+    let currentSort = 'newest';
+
+    const SORT_OPTIONS = [
+      { key: 'newest', label: 'Newest first', group: 'Date' },
+      { key: 'oldest', label: 'Oldest first', group: 'Date' },
+      { key: 'az', label: 'Name A → Z', group: 'Name' },
+      { key: 'za', label: 'Name Z → A', group: 'Name' },
+      { key: 'files_desc', label: 'Most files', group: 'Files' },
+      { key: 'files_asc', label: 'Fewest files', group: 'Files' },
+    ];
+
+    function applySort(list) {
+      const copy = list.slice();
+      const cmp = (a, b) => {
+        switch (currentSort) {
+          case 'oldest': return new Date(a.modifiedTime) - new Date(b.modifiedTime);
+          case 'az': return a.name.localeCompare(b.name);
+          case 'za': return b.name.localeCompare(a.name);
+          case 'files_desc': return b.fileCount - a.fileCount;
+          case 'files_asc': return a.fileCount - b.fileCount;
+          case 'newest':
+          default: return new Date(b.modifiedTime) - new Date(a.modifiedTime);
+        }
+      };
+      copy.sort(cmp);
+      return copy;
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth');
+        const data = await res.json();
+        setAdminMode(!!data.admin);
+      } catch (e) {
+        setAdminMode(false);
+      }
+    }
+
+    async function applySiteSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const s = await res.json();
+        const titleEl = document.querySelector('header h1');
+        const subEl = document.querySelector('.header-sub');
+        if (s.title) {
+          // Render "Modeling <em>Papers</em>" style: split last word into emphasis
+          titleEl.innerHTML = renderSiteTitle(s.title);
+        }
+        if (s.subtitle) subEl.textContent = s.subtitle;
+        document.title = (s.title || 'Paper Archive') + ' · Paper Archive';
+      } catch (e) { /* keep defaults */ }
+    }
+
+    function renderSiteTitle(title) {
+      const parts = String(title).trim().split(/\s+/);
+      if (parts.length >= 2) {
+        const last = parts.pop();
+        return esc(parts.join(' ')) + ' <em>' + esc(last) + '</em>';
+      }
+      return '<em>' + esc(title) + '</em>';
+    }
+
+    function esc(s) {
+      const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+    }
+
+    function setAdminMode(val) {
+      isAdmin = val;
+      document.body.classList.toggle('admin-mode', isAdmin);
+      const btn = document.getElementById('adminBtn');
+      const label = document.getElementById('adminBtnLabel');
+      const createBtn = document.getElementById('createBtn');
+      btn.classList.toggle('logged-in', isAdmin);
+      label.textContent = isAdmin ? 'Admin' : 'Admin';
+      createBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+      renderAdminMenu();
+      render(document.getElementById('searchInput').value);
+    }
+
+    function renderAdminMenu() {
+      const menu = document.getElementById('adminMenu');
+      if (isAdmin) {
+        menu.innerHTML = `
+          <div class="menu-label">Manage</div>
+          <button onclick="window.location.href='/admin.html';">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            Admin Dashboard
+          </button>
+          <div class="menu-divider"></div>
+          <div class="menu-label">Account</div>
+          <button onclick="showSettingsModal(); closeAdminMenu();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Change Password
+          </button>
+          <div class="menu-divider"></div>
+          <button onclick="submitLogout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        `;
+      } else {
+        menu.innerHTML = `
+          <button onclick="showLoginModal(); closeAdminMenu();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign In
+          </button>
+        `;
+      }
+    }
+
+    function toggleAdminMenu(e) {
+      e.stopPropagation();
+      document.getElementById('adminMenu').classList.toggle('active');
+    }
+
+    function closeAdminMenu() {
+      document.getElementById('adminMenu').classList.remove('active');
+    }
+
+    function showLoginModal() {
+      document.getElementById('loginOverlay').classList.add('active');
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginError').classList.remove('active');
+      setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+    }
+
+    function hideLoginModal() {
+      document.getElementById('loginOverlay').classList.remove('active');
+    }
+
+    async function submitLogin() {
+      const pw = document.getElementById('loginPassword').value;
+      const errEl = document.getElementById('loginError');
+      errEl.classList.remove('active');
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw })
+        });
+        if (!res.ok) {
+          errEl.classList.add('active');
+          return;
+        }
+        hideLoginModal();
+        showToast('Signed in', 'success');
+        await checkAuth();
+      } catch (e) {
+        errEl.classList.add('active');
+      }
+    }
+
+    async function submitLogout() {
+      closeAdminMenu();
+      await fetch('/api/logout', { method: 'POST' });
+      showToast('Signed out');
+      setAdminMode(false);
+    }
+
+    function showSettingsModal() {
+      document.getElementById('settingsOverlay').classList.add('active');
+      document.getElementById('oldPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('oldPasswordError').classList.remove('active');
+      document.getElementById('confirmError').classList.remove('active');
+      setTimeout(() => document.getElementById('oldPassword').focus(), 100);
+    }
+
+    function hideSettingsModal() {
+      document.getElementById('settingsOverlay').classList.remove('active');
+    }
+
+    async function submitChangePassword() {
+      const oldPw = document.getElementById('oldPassword').value;
+      const newPw = document.getElementById('newPassword').value;
+      const confirmPw = document.getElementById('confirmPassword').value;
+      const oldErr = document.getElementById('oldPasswordError');
+      const confirmErr = document.getElementById('confirmError');
+      oldErr.classList.remove('active');
+      confirmErr.classList.remove('active');
+
+      if (!newPw || newPw !== confirmPw) {
+        confirmErr.classList.add('active');
+        return;
+      }
+
+      const res = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPassword: oldPw, newPassword: newPw })
+      });
+      if (res.status === 401) {
+        oldErr.classList.add('active');
+        return;
+      }
+      if (!res.ok) {
+        showToast('Failed to change password', 'error');
+        return;
+      }
+      hideSettingsModal();
+      showToast('Password changed. Please sign in again.', 'success');
+      setAdminMode(false);
+      setTimeout(showLoginModal, 400);
+    }
+
+    function askDelete(enc, displayName) {
+      pendingDelete = { enc, displayName };
+      document.getElementById('confirmName').textContent = displayName;
+      document.getElementById('confirmOverlay').classList.add('active');
+    }
+
+    function hideConfirmModal() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      pendingDelete = null;
+    }
+
+    async function confirmDelete() {
+      if (!pendingDelete) return;
+      const { enc, displayName } = pendingDelete;
+      hideConfirmModal();
+      try {
+        const res = await fetch(`/api/competitions/${enc}`, { method: 'DELETE' });
+        if (!res.ok) {
+          showToast('Failed to delete', 'error');
+          return;
+        }
+        showToast(`Deleted "${displayName}"`, 'success');
+        loadData();
+      } catch (e) {
+        showToast('Failed to delete', 'error');
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast active ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('active');
+      }, 2500);
+    }
+
+    async function loadData() {
+      const res = await fetch('/api/competitions');
+      competitions = await res.json();
+      render();
+    }
+
+    function getCardAccentClass(tags) {
+      if (!tags || !tags.length) return '';
+      const award = tags.find(t => t.isAward);
+      if (!award) return 'has-accent';
+      if (award.level === 'national') return 'has-gold';
+      if (award.level === 'provincial') return 'has-provincial';
+      if (award.level === 'international') return 'has-international';
+      return 'has-accent';
+    }
+
+    function render(filter = '') {
+      const grid = document.getElementById('grid');
+      const empty = document.getElementById('emptyState');
+      const label = document.getElementById('sectionLabel');
+
+      let filtered = competitions.filter(c =>
+        c.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      if (awardFilterActive) {
+        filtered = filtered.filter(c => c.tags && c.tags.some(t => t.isAward));
+      }
+
+      filtered = applySort(filtered);
+
+      document.getElementById('totalCount').textContent = competitions.length;
+      document.getElementById('totalFiles').textContent = competitions.reduce((s, c) => s + c.fileCount, 0);
+
+      label.textContent = awardFilterActive
+        ? `Awarded · ${filtered.length}`
+        : `All Papers · ${filtered.length}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.innerHTML = filtered.map((c, i) => {
+        const enc = encodeURIComponent(c.name);
+        const escaped = c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const st = STATUS_MAP[c.status] || STATUS_MAP.completed;
+        const accentClass = getCardAccentClass(c.tags);
+        const adminControls = isAdmin ? 'admin-mode' : '';
+
+        return `
+        <div class="card ${accentClass} ${adminControls}" style="animation-delay:${i * 0.03}s" onclick="openPDF('${enc}', '${escaped}')">
+          <div class="card-accent"></div>
+          ${isAdmin ? `
+          <button class="card-delete-btn" onclick="event.stopPropagation(); askDelete('${enc}', '${escaped}')" title="Delete competition">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          </button>` : ''}
+          <div class="card-inner">
+            <div class="card-header">
+              <h3>${c.name}</h3>
+              <div style="position:relative" onclick="event.stopPropagation()">
+                ${isAdmin ? `
+                <button class="status-badge ${st.cls}" onclick="toggleStatus(${i})">${st.label}</button>
+                <div class="status-selector" id="status-sel-${i}">
+                  ${Object.entries(STATUS_MAP).map(([k, v]) =>
+                    `<button class="status-option" onclick="setStatus(${i}, '${enc}', '${k}')">${v.label}</button>`
+                  ).join('')}
+                </div>` : `<span class="status-badge ${st.cls}">${st.label}</span>`}
+              </div>
+            </div>
+            <div class="tags-row" onclick="event.stopPropagation()">
+              ${(c.tags || []).map((t, ti) => tagHTML(c, i, t, ti, isAdmin)).join('')}
+              ${isAdmin ? `
+              <div style="position:relative">
+                <button class="add-tag-btn" onclick="toggleTagPopover(${i})">+ Tag</button>
+                <div class="tag-popover" id="tag-pop-${i}">
+                  <div class="tag-popover-levels">
+                    <button class="tag-level-btn active" data-level="regular" onclick="selectTagLevel(this, 'regular')">Tag</button>
+                    <button class="tag-level-btn" data-level="national" onclick="selectTagLevel(this, 'national')">National</button>
+                    <button class="tag-level-btn" data-level="provincial" onclick="selectTagLevel(this, 'provincial')">Provincial</button>
+                    <button class="tag-level-btn" data-level="international" onclick="selectTagLevel(this, 'international')">International</button>
+                  </div>
+                  <div class="tag-popover-input">
+                    <input type="text" id="tag-input-${i}" placeholder="Enter tag..." onkeydown="if(event.key==='Enter')addTag(${i},'${enc}')">
+                    <button onclick="addTag(${i},'${enc}')">Add</button>
+                  </div>
+                </div>
+              </div>` : ''}
+            </div>
+            <div class="card-meta">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                ${c.fileCount} files
+              </span>
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${new Date(c.modifiedTime).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+            <div class="card-divider"></div>
+            <div class="card-actions" onclick="event.stopPropagation()">
+              ${c.hasThesis ? `
+              <button class="btn btn-primary btn-sm" onclick="openPDF('${enc}', '${escaped}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View Paper
+              </button>` : ''}
+              <a class="btn btn-ghost btn-sm" href="/api/competitions/${enc}/download" download="${c.name}.zip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download
+              </a>
+              ${isAdmin ? `
+              <label class="upload-label" style="height:32px;font-size:0.8rem;padding:0 14px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload
+                <input type="file" accept=".zip" onchange="uploadZip('${enc}', this)">
+              </label>` : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function tagHTML(c, ci, tag, ti, isAdmin) {
+      const enc = encodeURIComponent(c.name);
+      const removeBtn = isAdmin ? `<button class="tag-remove" onclick="removeTag(${ci}, '${enc}', ${ti})">&times;</button>` : '';
+      if (tag.isAward) {
+        const levelLabel = LEVEL_LABELS[tag.level] || '';
+        const cls = `tag-${tag.level || 'national'}`;
+        return `<span class="tag ${cls}">
+          ${tag.text}<span class="tag-level">${levelLabel}</span>
+          ${removeBtn}
+        </span>`;
+      }
+      return `<span class="tag tag-regular">
+        ${tag.text}
+        ${removeBtn}
+      </span>`;
+    }
+
+    function toggleStatus(i) {
+      closeAllPopovers();
+      document.getElementById(`status-sel-${i}`).classList.toggle('active');
+    }
+
+    async function setStatus(i, enc, status) {
+      await fetch(`/api/competitions/${enc}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      competitions[i].status = status;
+      render(document.getElementById('searchInput').value);
+    }
+
+    let currentTagLevel = {};
+
+    function toggleTagPopover(i) {
+      closeAllPopovers();
+      const pop = document.getElementById(`tag-pop-${i}`);
+      pop.classList.toggle('active');
+      if (pop.classList.contains('active')) {
+        currentTagLevel[i] = 'regular';
+        setTimeout(() => document.getElementById(`tag-input-${i}`).focus(), 50);
+      }
+    }
+
+    function selectTagLevel(btn, level) {
+      const pop = btn.closest('.tag-popover');
+      pop.querySelectorAll('.tag-level-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const i = parseInt(pop.id.split('-')[2]);
+      currentTagLevel[i] = level;
+    }
+
+    async function addTag(i, enc) {
+      const input = document.getElementById(`tag-input-${i}`);
+      const text = input.value.trim();
+      if (!text) return;
+      const level = currentTagLevel[i] || 'regular';
+      const isAward = level !== 'regular';
+      await fetch(`/api/competitions/${enc}/tags`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, isAward, level: isAward ? level : '' })
+      });
+      if (!competitions[i].tags) competitions[i].tags = [];
+      competitions[i].tags.push({ text, isAward, level: isAward ? level : '' });
+      input.value = '';
+      render(document.getElementById('searchInput').value);
+    }
+
+    async function removeTag(ci, enc, ti) {
+      await fetch(`/api/competitions/${enc}/tags`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index: ti })
+      });
+      competitions[ci].tags.splice(ti, 1);
+      render(document.getElementById('searchInput').value);
+    }
+
+    async function uploadZip(enc, input) {
+      if (!input.files.length) return;
+      const formData = new FormData();
+      formData.append('file', input.files[0]);
+      await fetch(`/api/competitions/${enc}/upload`, { method: 'POST', body: formData });
+      input.value = '';
+      loadData();
+    }
+
+    function showCreateModal() {
+      document.getElementById('createOverlay').classList.add('active');
+      document.getElementById('createName').value = '';
+      document.getElementById('createStatus').value = 'planned';
+      document.getElementById('createFile').value = '';
+      document.getElementById('createUploadText').textContent = 'Select ZIP file';
+      setTimeout(() => document.getElementById('createName').focus(), 100);
+    }
+
+    function hideCreateModal() {
+      document.getElementById('createOverlay').classList.remove('active');
+    }
+
+    function onCreateFileChange() {
+      const f = document.getElementById('createFile');
+      document.getElementById('createUploadText').textContent = f.files.length ? f.files[0].name : 'Select ZIP file';
+    }
+
+    async function submitCreate() {
+      const name = document.getElementById('createName').value.trim();
+      const status = document.getElementById('createStatus').value;
+      if (!name) return;
+      const res = await fetch('/api/competitions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, status })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Failed to create');
+        return;
+      }
+      const fileInput = document.getElementById('createFile');
+      if (fileInput.files.length) {
+        const enc = encodeURIComponent(name);
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        await fetch(`/api/competitions/${enc}/upload`, { method: 'POST', body: formData });
+      }
+      hideCreateModal();
+      loadData();
+    }
+
+    function openPDF(enc, displayName) {
+      const overlay = document.getElementById('modalOverlay');
+      const body = document.getElementById('modalBody');
+      const title = document.getElementById('modalTitle');
+      const download = document.getElementById('modalDownload');
+      const fileListItems = document.getElementById('fileListItems');
+      const comp = competitions.find(c => c.name === displayName);
+      title.textContent = displayName;
+      download.href = `/api/competitions/${enc}/download`;
+      download.download = `${displayName}.zip`;
+      fileListItems.innerHTML = (comp ? comp.files : [])
+        .filter(f => f !== 'thesis.pdf')
+        .map(f => `<li>${f}</li>`)
+        .join('') || '<li>No attachments</li>';
+      overlay.classList.add('active');
+      body.innerHTML = `<iframe src="/api/competitions/${enc}/pdf"></iframe>`;
+    }
+
+    function toggleAwardFilter() {
+      awardFilterActive = !awardFilterActive;
+      document.getElementById('filterAwardBtn').classList.toggle('active', awardFilterActive);
+      render(document.getElementById('searchInput').value);
+    }
+
+    function renderSortMenu() {
+      const menu = document.getElementById('sortMenu');
+      let html = '';
+      let lastGroup = '';
+      const check = `<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+      for (const opt of SORT_OPTIONS) {
+        if (opt.group !== lastGroup) {
+          html += `<div class="menu-label">${opt.group}</div>`;
+          lastGroup = opt.group;
+        }
+        const active = opt.key === currentSort ? 'active' : '';
+        html += `<button class="${active}" onclick="setSort('${opt.key}')">${opt.label}${check}</button>`;
+      }
+      menu.innerHTML = html;
+    }
+
+    function toggleSortMenu(e) {
+      e.stopPropagation();
+      renderSortMenu();
+      document.getElementById('sortMenu').classList.toggle('active');
+    }
+
+    function closeSortMenu() {
+      document.getElementById('sortMenu').classList.remove('active');
+    }
+
+    function setSort(key) {
+      currentSort = key;
+      const opt = SORT_OPTIONS.find(o => o.key === key);
+      document.getElementById('sortLabel').textContent = opt ? opt.label.split(' ')[0] : 'Sort';
+      closeSortMenu();
+      render(document.getElementById('searchInput').value);
+    }
+
+    function closeAllPopovers() {
+      document.querySelectorAll('.status-selector.active, .tag-popover.active').forEach(el => el.classList.remove('active'));
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.status-badge') && !e.target.closest('.status-selector') &&
+          !e.target.closest('.add-tag-btn') && !e.target.closest('.tag-popover')) {
+        closeAllPopovers();
+      }
+      if (!e.target.closest('.admin-btn') && !e.target.closest('.admin-menu')) {
+        closeAdminMenu();
+      }
+      if (!e.target.closest('.sort-wrap')) {
+        closeSortMenu();
+      }
+    });
+
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('modalOverlay').classList.remove('active');
+    });
+
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+    });
+
+    document.getElementById('createOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideCreateModal();
+    });
+
+    document.getElementById('loginOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideLoginModal();
+    });
+
+    document.getElementById('settingsOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideSettingsModal();
+    });
+
+    document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideConfirmModal();
+    });
+
+    document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitLogin();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('modalOverlay').classList.remove('active');
+        hideCreateModal();
+        hideLoginModal();
+        hideSettingsModal();
+        hideConfirmModal();
+        closeAllPopovers();
+        closeAdminMenu();
+        closeSortMenu();
+      }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      render(e.target.value);
+    });
+
+    checkAuth();
+    loadData();
+    applySiteSettings();
+  </script>
+</body>
+</html>
