@@ -13,8 +13,8 @@ A lightweight web application for managing and browsing mathematical modeling co
 
 ## Tech Stack
 
-- **Backend**: Go 1.26 (single-file `main.go`, ~860 lines)
-- **Frontend**: Vanilla HTML/CSS/JS with embedded static files
+- **Backend**: Rust with Axum and Tokio
+- **Frontend**: Vanilla HTML/CSS/JS static files
 - **Storage**: Local filesystem (`src/` directory)
 
 ## Quick Start
@@ -25,7 +25,7 @@ git clone https://github.com/<your-username>/paper-list.git
 cd paper-list
 
 # Build and run
-go run main.go
+cargo run
 ```
 
 Open `http://localhost:3000` in your browser.
@@ -35,15 +35,14 @@ Default admin password: `admin` (change on first login via Settings).
 ## Project Structure
 
 ```
-├── main.go          # Single-file Go backend with all API routes
-├── go.mod           # Go module definition
+├── Cargo.toml       # Rust package definition
+├── server/          # Rust backend source
 ├── config.json      # Site config & auth (gitignored)
-├── public/          # Embedded static frontend
+├── public/          # Static frontend
 │   ├── index.html   # Main browsing page
 │   └── admin.html   # Admin management panel
-├── src/             # Competition papers & metadata
-│   └── metadata.json
-└── deploy/          # Deployment scripts
+└── src/             # Runtime competition papers & metadata (gitignored)
+    └── metadata.json
 ```
 
 ## API Routes

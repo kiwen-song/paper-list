@@ -1,0 +1,21 @@
+[package]
+name = "paper-list"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "paper-list"
+path = "server/main.rs"
+
+[dependencies]
+axum = { version = "0.8", features = ["multipart"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+hex = "0.4"
+rand = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
+urlencoding = "2"
+walkdir = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }

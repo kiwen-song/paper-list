@@ -4,9 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin · Paper Archive</title>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('paperlist.theme');
+      if (theme === 'dark') document.documentElement.dataset.theme = 'dark';
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:wght@0,500;0,600;0,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@0,500;0,600;0,700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -42,6 +48,29 @@
       --radius-sm: 6px;
       --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    html[data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --sidebar: #141414;
+      --sidebar-hover: #262626;
+      --sidebar-text: #d6d3d1;
+      --sidebar-muted: #78716c;
+      --text: #f5f5f4;
+      --text-secondary: #a8a29e;
+      --text-muted: #78716c;
+      --accent: #14b8a6;
+      --accent-hover: #2dd4bf;
+      --accent-light: #134e4a;
+      --accent-muted: rgba(20,184,166,0.12);
+      --border: #292524;
+      --border-hover: #44403c;
+      --rose: #f43f5e;
+      --rose-light: #4c0519;
+    }
+
+    html[data-theme="dark"] .toast { color: #fafaf9; }
+    html[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.55); }
 
     body {
       font-family: var(--body);
@@ -224,6 +253,28 @@
     .cell-muted { color: var(--text-muted); font-variant-numeric: tabular-nums; }
     .row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
+    .checkbox {
+      appearance: none; width: 16px; height: 16px; border: 1px solid var(--border-hover);
+      border-radius: 4px; background: var(--surface); cursor: pointer; position: relative; outline: none;
+    }
+    .checkbox:checked {
+      background: var(--accent); border-color: var(--accent);
+    }
+    .checkbox:checked::after {
+      content: ''; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px;
+      border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+    }
+
+    .bulk-bar {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(120%);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 18px; display: flex; align-items: center; gap: 24px; box-shadow: var(--shadow-lg);
+      z-index: 100; transition: transform 200ms var(--ease); max-width: calc(100% - 48px); width: 460px;
+    }
+    .bulk-bar.active { transform: translateX(-50%) translateY(0); }
+    .bulk-bar span { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+    .bulk-actions { display: flex; gap: 8px; margin-left: auto; }
+
     /* ---- Status badge (compact) ---- */
     .badge {
       display: inline-flex; align-items: center; gap: 5px;
@@ -267,17 +318,31 @@
     .btn svg { width: 14px; height: 14px; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:active { transform: translateY(1px) scale(0.98); }
     .btn-ghost { background: var(--surface); color: var(--text-secondary); border-color: var(--border); }
     .btn-ghost:hover { background: var(--bg); border-color: var(--border-hover); }
+    .btn-ghost:active { transform: translateY(1px) scale(0.98); }
     .btn-icon {
       width: 32px; height: 32px; padding: 0; border-radius: var(--radius-sm);
       background: transparent; border: 1px solid transparent; color: var(--text-muted);
     }
     .btn-icon:hover { background: var(--bg); color: var(--text); border-color: var(--border); }
+    .btn-icon:active { transform: translateY(1px) scale(0.95); }
     .btn-icon.danger:hover { background: var(--rose-light); color: var(--rose); border-color: var(--rose); }
     .btn-danger { background: var(--rose); color: #fff; }
     .btn-danger:hover { background: #9f1239; }
+    .btn-danger:active { transform: translateY(1px) scale(0.98); }
     .btn-sm { height: 30px; padding: 0 12px; font-size: 0.78rem; }
+
+    .theme-btn { position: relative; }
+    .theme-btn .sun, .theme-btn .moon {
+      position: absolute; inset: 0; margin: auto; width: 16px; height: 16px;
+      transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+    }
+    .theme-btn .sun { opacity: 1; transform: scale(1); }
+    .theme-btn .moon { opacity: 0; transform: scale(0.7); }
+    html[data-theme="dark"] .theme-btn .sun { opacity: 0; transform: scale(0.7); }
+    html[data-theme="dark"] .theme-btn .moon { opacity: 1; transform: scale(1); }
 
     .upload-inline {
       display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px;
@@ -306,6 +371,15 @@
       border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-muted);
     }
     .form-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 5px; }
+
+    .admin-sort {
+      appearance: none; height: 34px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface); padding: 0 30px 0 12px; font-family: var(--body); font-size: 0.8rem;
+      color: var(--text-secondary); cursor: pointer; min-width: 170px; outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23a8a29e' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+    .admin-sort:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-muted); }
     .form-error { font-size: 0.76rem; color: var(--rose); margin-top: 5px; display: none; }
     .form-error.active { display: block; }
     .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
@@ -315,6 +389,18 @@
       display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
     }
     .file-picker select { flex: 1; max-width: 360px; }
+    .drop-zone {
+      border: 2px dashed transparent; border-radius: var(--radius-sm); padding: 4px; transition: all 180ms var(--ease);
+    }
+    .drop-zone.drop-active {
+      border-color: var(--accent); background: var(--accent-muted);
+    }
+    .drag-hint {
+      display: none; font-size: 0.72rem; color: var(--accent); margin-top: 8px; text-align: center;
+    }
+    .drop-active + .drag-hint, .drop-zone.drop-active + .drag-hint, .drop-zone .drag-hint { display: none; }
+    .drop-zone.drop-active .drag-hint { display: block; }
+
     .file-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 12px;
@@ -330,6 +416,17 @@
     .file-meta { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
     .file-size { font-size: 0.78rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
     .empty-inline { padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.86rem; }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg) 0%, var(--surface) 50%, var(--bg) 100%);
+      background-size: 200% 100%;
+      animation: skeleton 1.2s ease-in-out infinite;
+      border-radius: var(--radius-sm);
+    }
+    @keyframes skeleton { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    .skeleton-line { height: 14px; margin: 8px 0; }
+    .skeleton-title { height: 20px; width: 60%; margin: 10px 0; }
+    .skeleton-card { height: 90px; border-radius: var(--radius); }
 
     /* ---- Toast ---- */
     .toast {
@@ -404,6 +501,9 @@
       .sidebar.open { transform: none; }
       .main { margin-left: 0; }
       .menu-toggle { display: flex !important; }
+      .panels-row { grid-template-columns: 1fr !important; }
+      .panel-header { flex-wrap: wrap; }
+      .admin-sort { width: 100%; max-width: 220px; }
     }
     .menu-toggle {
       display: none; width: 36px; height: 36px; align-items: center; justify-content: center;
@@ -416,6 +516,803 @@
       z-index: 45;
     }
     .backdrop.active { display: block; }
+    /* ---- Previous experimental admin layer; superseded by the archive system below ---- */
+    :root {
+      --bg: #f4efe6;
+      --surface: #fffdf8;
+      --sidebar: #17130f;
+      --sidebar-hover: #2a241d;
+      --sidebar-text: #f6eee2;
+      --sidebar-muted: #a89886;
+      --text: #17130f;
+      --text-secondary: #5f574c;
+      --text-muted: #9b9285;
+      --accent: #9f2f24;
+      --accent-hover: #7f241c;
+      --accent-light: #f6ddd7;
+      --accent-muted: rgba(159,47,36,0.08);
+      --border: #d9d0c3;
+      --border-hover: #b9ad9c;
+      --rose: #9f2f24;
+      --rose-light: #f6ddd7;
+      --heading: 'Lora', 'Noto Serif SC', Georgia, serif;
+      --body: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --radius: 4px;
+      --radius-sm: 3px;
+      --shadow-xs: none;
+      --shadow-sm: 0 12px 30px rgba(23,19,15,0.08);
+      --shadow-md: 0 24px 55px rgba(23,19,15,0.12);
+      --shadow-lg: 0 34px 80px rgba(23,19,15,0.16);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #16130f;
+      --surface: #211d18;
+      --sidebar: #0f0d0a;
+      --sidebar-hover: #231e18;
+      --sidebar-text: #f7efe2;
+      --sidebar-muted: #988b7b;
+      --text: #f7efe2;
+      --text-secondary: #cfc2b0;
+      --text-muted: #988b7b;
+      --accent: #e06657;
+      --accent-hover: #f0877b;
+      --accent-light: rgba(224,102,87,0.16);
+      --accent-muted: rgba(224,102,87,0.12);
+      --border: #3b332a;
+      --border-hover: #584c3f;
+      --rose: #f0877b;
+      --rose-light: rgba(224,102,87,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background:
+        linear-gradient(90deg, rgba(23,19,15,0.035) 1px, transparent 1px) 0 0 / 80px 80px,
+        var(--bg);
+      font-feature-settings: "kern" 1, "liga" 1;
+      letter-spacing: 0;
+    }
+
+    .sidebar {
+      width: 276px;
+      padding: 30px 18px;
+      border-right: 1px solid var(--text);
+      background:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px) 0 0 / 100% 28px,
+        var(--sidebar);
+    }
+
+    .sidebar-brand {
+      display: block;
+      padding: 0 8px 28px;
+      border-bottom: 1px solid rgba(246,238,226,0.55);
+    }
+
+    .sidebar-brand .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 0;
+      margin-bottom: 18px;
+      background: var(--accent);
+    }
+
+    .sidebar-brand .brand-title {
+      font-family: var(--heading);
+      font-size: 2rem;
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    .sidebar-brand .brand-sub,
+    .nav-label {
+      letter-spacing: 0.18em;
+      font-size: 0.66rem;
+    }
+
+    .nav-item {
+      border-radius: 0;
+      padding: 11px 12px;
+      border-left: 2px solid transparent;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: transparent;
+      color: #fff;
+      border-left-color: var(--accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .main { margin-left: 276px; }
+
+    .topbar {
+      min-height: 118px;
+      border-bottom: 1px solid var(--text);
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(16px);
+      padding: 24px 42px;
+    }
+
+    .topbar-title {
+      font-family: var(--heading);
+      font-size: clamp(2.2rem, 5vw, 4.5rem);
+      line-height: 0.9;
+      letter-spacing: 0;
+    }
+
+    .topbar-sub {
+      margin-top: 8px;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .content {
+      max-width: 1680px;
+      padding: clamp(24px, 4vw, 54px) clamp(20px, 4vw, 56px) 100px;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      border: 1px solid var(--text);
+      background: var(--surface);
+      margin-bottom: 34px;
+    }
+
+    .kpi {
+      border: 0;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      padding: 28px;
+    }
+
+    .kpi:last-child { border-right: 0; }
+
+    .kpi-label {
+      letter-spacing: 0.16em;
+      color: var(--text-secondary);
+    }
+
+    .kpi-value {
+      font-family: var(--heading);
+      font-size: clamp(3rem, 5.4vw, 5.6rem);
+      line-height: 0.85;
+      letter-spacing: 0;
+    }
+
+    .panel {
+      border-radius: 0;
+      border: 1px solid var(--text);
+      box-shadow: none;
+      background: var(--surface);
+    }
+
+    .panel-header {
+      border-bottom: 1px solid var(--text);
+      padding: 18px 22px;
+      background: transparent;
+    }
+
+    .panel-title {
+      font-family: var(--heading);
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    table { font-size: 0.88rem; }
+
+    thead th {
+      background: transparent;
+      border-bottom: 1px solid var(--text);
+      color: var(--text);
+      letter-spacing: 0.14em;
+      font-size: 0.66rem;
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cell-name {
+      font-family: var(--heading);
+      font-size: 1.25rem;
+      color: var(--text);
+      line-height: 1.05;
+    }
+
+    .btn,
+    .btn-icon,
+    .admin-sort,
+    input,
+    select,
+    .upload-inline,
+    .modal,
+    .status-select,
+    .checkbox {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .btn {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      background: var(--text);
+      border-color: var(--text);
+      color: var(--surface);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-ghost,
+    .btn-icon,
+    .upload-inline {
+      background: transparent;
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .btn-icon:hover,
+    .upload-inline:hover {
+      background: var(--text);
+      color: var(--surface);
+    }
+
+    .tag,
+    .badge {
+      border-radius: 0;
+      border: 1px solid currentColor;
+      background: transparent !important;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .file-row {
+      border-radius: 0;
+      border: 1px solid var(--border);
+      background: transparent;
+    }
+
+    .file-row + .file-row {
+      border-top: 0;
+    }
+
+    .file-name {
+      font-family: var(--heading);
+      font-size: 1.1rem;
+    }
+
+    .drop-zone.drop-active,
+    .upload-inline.drop-active {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .modal {
+      border: 1px solid var(--text);
+      background: var(--surface);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--text);
+    }
+
+    .modal-header h2 {
+      font-family: var(--heading);
+      font-size: 2rem;
+      line-height: 0.95;
+    }
+
+    .loading-screen {
+      background: var(--bg);
+    }
+
+    .spinner {
+      border-radius: 0;
+      border-color: var(--border);
+      border-top-color: var(--accent);
+    }
+
+    @media (max-width: 1100px) {
+      .main { margin-left: 0; }
+      .sidebar {
+        width: 276px;
+        transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .kpi:nth-child(2) { border-right: 0; }
+    }
+
+    @media (max-width: 720px) {
+      .topbar { padding: 18px 20px; min-height: 92px; }
+      .content { padding: 22px 16px 80px; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .kpi { border-right: 0; border-bottom: 1px solid var(--border); }
+      .panels-row { grid-template-columns: 1fr !important; }
+    }
+    /* ---- Calm archive operations redesign ---- */
+    :root {
+      --bg: #f6f4ef;
+      --surface: #ffffff;
+      --sidebar: #24282c;
+      --sidebar-hover: #30363b;
+      --sidebar-text: #f4f1ea;
+      --sidebar-muted: #aeb4b8;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --text-muted: #8b8f95;
+      --accent: #2f5f73;
+      --accent-hover: #24495a;
+      --accent-light: #e7f0f3;
+      --accent-muted: rgba(47,95,115,0.08);
+      --border: #d9d7d0;
+      --border-hover: #b8b5ac;
+      --rose: #a54848;
+      --rose-light: #f4e4e4;
+      --heading: 'Lora', 'Noto Serif SC', Georgia, serif;
+      --body: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --radius: 6px;
+      --radius-sm: 4px;
+      --shadow-xs: 0 1px 2px rgba(32,33,36,0.04);
+      --shadow-sm: 0 8px 22px rgba(32,33,36,0.06);
+      --shadow-md: 0 14px 34px rgba(32,33,36,0.09);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #17191b;
+      --surface: #202326;
+      --sidebar: #111315;
+      --sidebar-hover: #24282c;
+      --sidebar-text: #f3f0e9;
+      --sidebar-muted: #949da3;
+      --text: #f3f0e9;
+      --text-secondary: #c8c3ba;
+      --text-muted: #8f887d;
+      --accent: #86b7c7;
+      --accent-hover: #a8d2df;
+      --accent-light: rgba(134,183,199,0.14);
+      --accent-muted: rgba(134,183,199,0.10);
+      --border: #34383c;
+      --border-hover: #4b5157;
+      --rose: #d98080;
+      --rose-light: rgba(217,128,128,0.14);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    .sidebar {
+      width: 248px;
+      padding: 22px 14px;
+      border-right: 0;
+      background: var(--sidebar);
+    }
+
+    .sidebar-brand {
+      display: flex;
+      padding: 0 10px 22px;
+      border-bottom: 1px solid rgba(244,241,234,0.14);
+    }
+
+    .sidebar-brand .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      margin: 0;
+      background: var(--accent);
+    }
+
+    .sidebar-brand .brand-title {
+      font-family: var(--heading);
+      font-size: 1.1rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .sidebar-brand .brand-sub,
+    .nav-label {
+      letter-spacing: 0.12em;
+      font-size: 0.66rem;
+    }
+
+    .nav-item {
+      border-radius: var(--radius-sm);
+      border-left: 0;
+      padding: 9px 12px;
+      letter-spacing: 0;
+    }
+
+    .nav-item:hover {
+      background: var(--sidebar-hover);
+    }
+
+    .nav-item.active {
+      background: var(--accent);
+      color: #fff;
+      border-left-color: transparent;
+    }
+
+    .main { margin-left: 248px; }
+
+    .topbar {
+      min-height: 74px;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 94%, transparent);
+      backdrop-filter: blur(14px);
+      padding: 16px 28px;
+    }
+
+    .topbar-title {
+      font-family: var(--heading);
+      font-size: 1.65rem;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .topbar-sub {
+      margin-top: 2px;
+      color: var(--text-muted);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .content {
+      max-width: 1440px;
+      padding: 28px;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      border: 0;
+      background: transparent;
+      margin-bottom: 24px;
+    }
+
+    .kpi {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-xs);
+      padding: 20px;
+    }
+
+    .kpi:last-child { border-right: 1px solid var(--border); }
+
+    .kpi-label {
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-family: var(--heading);
+      font-size: 2.15rem;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .panel {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xs);
+      background: var(--surface);
+    }
+
+    .panel-header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      background: transparent;
+    }
+
+    .panel-title {
+      font-family: var(--heading);
+      font-size: 1.18rem;
+      line-height: 1.2;
+    }
+
+    table { font-size: 0.88rem; }
+
+    thead th {
+      background: color-mix(in srgb, var(--bg) 64%, var(--surface));
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      font-size: 0.68rem;
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cell-name {
+      font-family: var(--body);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.25;
+    }
+
+    .btn,
+    .btn-icon,
+    .admin-sort,
+    input,
+    select,
+    .upload-inline,
+    .modal,
+    .status-select,
+    .checkbox {
+      border-radius: var(--radius-sm) !important;
+      box-shadow: none !important;
+    }
+
+    .btn {
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.84rem;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-ghost,
+    .btn-icon,
+    .upload-inline {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn-icon:hover,
+    .upload-inline:hover {
+      background: var(--accent-muted);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .tag,
+    .badge {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg) !important;
+      letter-spacing: 0;
+      text-transform: none;
+      font-weight: 500;
+    }
+
+    .file-row {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 8px;
+    }
+
+    .file-row + .file-row {
+      border-top: 1px solid var(--border);
+    }
+
+    .file-name {
+      font-family: var(--body);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .manual-row {
+      cursor: grab;
+    }
+
+    .manual-row.dragging {
+      opacity: 0.55;
+    }
+
+    .manual-row.drag-over {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+      background: var(--accent-muted);
+    }
+
+    .drag-handle {
+      display: inline-flex;
+      width: 18px;
+      margin-right: 8px;
+      color: var(--text-muted);
+      cursor: grab;
+      user-select: none;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .drop-zone.drop-active,
+    .upload-inline.drop-active {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .modal {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow-md);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+      font-family: var(--heading);
+      font-size: 1.45rem;
+      line-height: 1.15;
+    }
+
+    .loading-screen {
+      background: var(--bg);
+    }
+
+    .spinner {
+      border-radius: 50%;
+      border-color: var(--border);
+      border-top-color: var(--accent);
+    }
+
+    @media (max-width: 1100px) {
+      .main { margin-left: 0; }
+      .sidebar {
+        width: 248px;
+        transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+    }
+
+    @media (max-width: 720px) {
+      .topbar { padding: 14px 16px; min-height: 68px; }
+      .content { padding: 18px 14px 72px; }
+      .panels-row { grid-template-columns: 1fr !important; }
+    }
+
+    /* ---- Compact polish ---- */
+    :root {
+      --bg: #faf8f3;
+      --surface: #fffefa;
+      --sidebar: #263037;
+      --sidebar-hover: #31404a;
+      --sidebar-text: #f7f4ec;
+      --sidebar-muted: #b5bdc3;
+      --text: #202124;
+      --text-secondary: #555b61;
+      --text-muted: #8a9096;
+      --accent: #315d6b;
+      --accent-hover: #254955;
+      --accent-light: #e8f0f2;
+      --accent-muted: rgba(49,93,107,0.075);
+      --border: #dedbd2;
+      --border-hover: #b9b5aa;
+      --shadow-xs: 0 1px 2px rgba(32,33,36,0.035);
+      --shadow-sm: 0 10px 26px rgba(32,33,36,0.07);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #17191b;
+      --surface: #212427;
+      --sidebar: #15191c;
+      --sidebar-hover: #242c31;
+      --accent: #8fbdc9;
+      --accent-hover: #abd4de;
+      --border: #34383c;
+      --border-hover: #50565c;
+    }
+
+    .sidebar {
+      width: 236px;
+      padding: 18px 12px;
+    }
+
+    .main {
+      margin-left: 236px;
+    }
+
+    .sidebar-brand {
+      padding-bottom: 18px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar-brand .logo {
+      width: 32px;
+      height: 32px;
+    }
+
+    .nav-item {
+      padding: 8px 10px;
+      margin-bottom: 1px;
+    }
+
+    .topbar {
+      min-height: 64px;
+      padding: 12px 24px;
+    }
+
+    .topbar-title {
+      font-size: 1.45rem;
+    }
+
+    .topbar-sub {
+      font-size: 0.76rem;
+    }
+
+    .content {
+      padding: 22px 24px 78px;
+    }
+
+    .kpi-grid {
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi {
+      padding: 17px 18px;
+    }
+
+    .kpi-value {
+      font-size: 1.9rem;
+    }
+
+    .panel {
+      box-shadow: var(--shadow-xs);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+    }
+
+    .panel-title {
+      font-size: 1.08rem;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .btn,
+    .upload-inline {
+      height: 36px;
+    }
+
+    @media (max-width: 1100px) {
+      .main { margin-left: 0; }
+      .sidebar { width: 236px; }
+    }
+
+    @media (max-width: 720px) {
+      .topbar { min-height: 60px; padding: 12px 14px; }
+      .content { padding: 16px 12px 68px; }
+    }
   </style>
 </head>
 <body>
@@ -431,12 +1328,12 @@
       <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
       <div class="brand-text">
         <div class="brand-title" id="brandTitle">Paper Archive</div>
-        <div class="brand-sub">Admin Console</div>
+        <div class="brand-sub">Archive Admin</div>
       </div>
     </div>
 
     <div class="nav-group">
-      <div class="nav-label">Manage</div>
+      <div class="nav-label">Archive</div>
       <button class="nav-item active" data-section="overview" onclick="showSection('overview')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
         Overview
@@ -485,6 +1382,10 @@
         </div>
       </div>
       <div class="topbar-actions">
+        <button class="btn btn-icon theme-btn" id="themeBtn" title="Toggle theme" onclick="toggleTheme()">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
         <button class="btn btn-primary btn-sm" onclick="openCreate()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New
@@ -523,16 +1424,41 @@
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">All Competitions</div>
-            <input type="text" id="compSearch" placeholder="Filter…" oninput="renderComps()"
-              style="height:34px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0 12px; font-size:0.84rem; outline:none; width:220px;">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <select id="compSort" class="admin-sort" onchange="renderComps()">
+                <option value="manual">Manual order</option>
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="az">Name A-Z</option>
+                <option value="za">Name Z-A</option>
+                <option value="files_desc">Files: high to low</option>
+                <option value="files_asc">Files: low to high</option>
+                <option value="size_desc">Size: large to small</option>
+                <option value="size_asc">Size: small to large</option>
+                <option value="status_asc">Status: planned → completed</option>
+                <option value="status_desc">Status: completed → planned</option>
+                <option value="award_desc">Award: int'l first</option>
+                <option value="award_asc">Award: local first</option>
+              </select>
+              <input type="text" id="compSearch" placeholder="Filter…" oninput="renderComps()"
+                style="height:34px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0 12px; font-size:0.84rem; outline:none; width:220px;">
+            </div>
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr>
+                <th style="width:40px;"><input type="checkbox" class="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
                 <th>Name</th><th>Status</th><th>Tags</th><th>Files</th><th>Updated</th><th style="text-align:right;">Actions</th>
               </tr></thead>
               <tbody id="compBody"></tbody>
             </table>
+          </div>
+          <div class="bulk-bar" id="bulkBar">
+            <span id="bulkCount">0 selected</span>
+            <div class="bulk-actions">
+              <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Cancel</button>
+              <button class="btn btn-danger btn-sm" onclick="askBulkDelete()">Delete Selected</button>
+            </div>
           </div>
         </div>
       </div>
@@ -542,15 +1468,21 @@
         <div class="panel">
           <div class="panel-header"><div class="panel-title">File Browser</div></div>
           <div class="panel-body">
-            <div class="file-picker">
-              <select id="fileCompSelect" onchange="loadFiles()" style="height:38px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0 12px; font-size:0.86rem; background:var(--surface); outline:none; min-width:280px;">
-                <option value="">Select a competition…</option>
-              </select>
-              <label class="upload-inline" id="fileUploadLabel">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Upload ZIP
-                <input type="file" accept=".zip" onchange="uploadToSelected(this)">
-              </label>
+            <div class="drop-zone" id="fileDropZone"
+              ondragover="handleFilePickerDragOver(event)"
+              ondragleave="handleFilePickerDragLeave(event)"
+              ondrop="handleFilePickerDrop(event)">
+              <div class="file-picker">
+                <select id="fileCompSelect" onchange="loadFiles()" style="height:38px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0 12px; font-size:0.86rem; background:var(--surface); outline:none; min-width:280px;">
+                  <option value="">Select a competition…</option>
+                </select>
+                <label class="upload-inline" id="fileUploadLabel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload ZIP
+                  <input type="file" accept=".zip" onchange="uploadToSelected(this)">
+                </label>
+              </div>
+              <div class="drag-hint">Drop a ZIP file here to upload</div>
             </div>
             <div id="fileListArea"></div>
           </div>
@@ -599,6 +1531,29 @@
             </div>
           </div>
         </div>
+
+        <div class="panel" style="max-width:560px;">
+          <div class="panel-header"><div class="panel-title">Metadata Backup</div></div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label>Download Backup</label>
+              <a class="btn btn-ghost btn-sm" href="/api/backup/metadata" download style="width:fit-content;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download metadata.json
+              </a>
+              <div class="form-hint">Save a copy of all competition metadata.</div>
+            </div>
+            <div class="form-group">
+              <label>Restore Backup</label>
+              <label class="upload-inline" style="height:38px; width:fit-content;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Select metadata.json</span>
+                <input type="file" accept=".json,application/json" onchange="restoreMetadata(this)">
+              </label>
+              <div class="form-hint">Restoring will overwrite existing metadata. Use with care.</div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -627,10 +1582,13 @@
         </div>
         <div class="form-group">
           <label>Upload Paper Package (optional .zip)</label>
-          <label class="upload-inline" style="height:42px;">
+          <label class="upload-inline drop-zone" id="createDropZone" style="height:42px; justify-content:center;"
+            ondragover="handleCreateDragOver(event)"
+            ondragleave="handleCreateDragLeave(event)"
+            ondrop="handleCreateDrop(event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span id="createUploadText">Select ZIP file</span>
-            <input type="file" accept=".zip" onchange="document.getElementById('createUploadText').textContent = this.files.length ? this.files[0].name : 'Select ZIP file'">
+            <span id="createUploadText">Select or drop ZIP file</span>
+            <input type="file" accept=".zip" onchange="document.getElementById('createUploadText').textContent = this.files.length ? this.files[0].name : 'Select or drop ZIP file'">
           </label>
         </div>
         <div class="form-actions">
@@ -661,6 +1619,27 @@
     </div>
   </div>
 
+  <!-- Rename modal -->
+  <div class="modal-overlay" id="renameOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Rename File</h2>
+        <button class="modal-close" onclick="closeRename()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>New path</label>
+          <input type="text" id="renameNewPath" placeholder="e.g. paper/final.pdf">
+          <div class="form-hint">Path relative to the competition folder.</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="closeRename()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="submitRename()">Rename</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -671,11 +1650,23 @@
       completed: { label: 'Completed', cls: 'b-completed', dot: '#a8a29e' },
     };
     const LEVEL = { national: 'National', provincial: 'Provincial', international: 'International' };
+    const STATUS_ORDER = { planned:0, upcoming:1, in_progress:2, completed:3 };
+    const AWARD_ORDER = { international:3, national:2, provincial:1 };
+    function getAwardPriority(tags) {
+      if (!tags) return 0;
+      let max = 0;
+      for (const t of tags) {
+        if (t.isAward && AWARD_ORDER[t.level] > max) max = AWARD_ORDER[t.level];
+      }
+      return max;
+    }
 
     let comps = [];
     let stats = null;
     let confirmAction = null; // { kind, ...payload }
+    let renameAction = null; // { compEnc, pathEnc }
     let currentFileComp = '';
+    let draggedCompName = '';
 
     // ---- helpers ----
     const $ = id => document.getElementById(id);
@@ -698,6 +1689,12 @@
     function toast(msg, type='') {
       const t = $('toast'); t.textContent = msg; t.className = 'toast active ' + type;
       clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('active'), 2400);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      document.documentElement.dataset.theme = isDark ? '' : 'dark';
+      localStorage.setItem('paperlist.theme', isDark ? '' : 'dark');
     }
 
     // ---- access guard ----
@@ -740,6 +1737,8 @@
 
     // ---- data ----
     async function loadAll() {
+      const savedSort = localStorage.getItem('paperlist.admin.sort') || 'manual';
+      $('compSort').value = savedSort;
       const [cRes, sRes, setRes] = await Promise.all([
         fetch('/api/competitions'), fetch('/api/stats'), fetch('/api/settings')
       ]);
@@ -813,24 +1812,49 @@
 
     // ---- competitions table ----
     function renderComps() {
+      const sort = $('compSort').value;
+      localStorage.setItem('paperlist.admin.sort', sort);
       const q = ($('compSearch').value || '').toLowerCase().trim();
-      let list = comps.slice().sort((a,b)=> new Date(b.modifiedTime) - new Date(a.modifiedTime));
+      let list = comps.slice().sort((a,b) => {
+        switch (sort) {
+          case 'manual': return (a.order ?? 999999) - (b.order ?? 999999);
+          case 'oldest': return new Date(a.modifiedTime) - new Date(b.modifiedTime);
+          case 'az': return a.name.localeCompare(b.name);
+          case 'za': return b.name.localeCompare(a.name);
+          case 'files_desc': return (b.fileCount||0) - (a.fileCount||0);
+          case 'files_asc': return (a.fileCount||0) - (b.fileCount||0);
+          case 'size_desc': return (b.totalSize||0) - (a.totalSize||0);
+          case 'size_asc': return (a.totalSize||0) - (b.totalSize||0);
+          case 'status_asc': return (STATUS_ORDER[a.status]||99) - (STATUS_ORDER[b.status]||99);
+          case 'status_desc': return (STATUS_ORDER[b.status]||99) - (STATUS_ORDER[a.status]||99);
+          case 'award_desc': return getAwardPriority(b.tags) - getAwardPriority(a.tags);
+          case 'award_asc': return getAwardPriority(a.tags) - getAwardPriority(b.tags);
+          default: return new Date(b.modifiedTime) - new Date(a.modifiedTime);
+        }
+      });
       if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
       if (!list.length) {
-        $('compBody').innerHTML = '<tr><td colspan="6" class="empty-inline">No competitions found.</td></tr>';
+        $('compBody').innerHTML = '<tr><td colspan="7" class="empty-inline">No competitions found.</td></tr>';
         return;
       }
-      $('compBody').innerHTML = list.map(c => compRow(c)).join('');
+      $('compBody').innerHTML = list.map(c => compRow(c, sort === 'manual' && !q)).join('');
     }
 
-    function compRow(c) {
+    function compRow(c, canDrag) {
       const e = enc(c.name);
       const st = STATUS[c.status] || STATUS.completed;
       const tags = (c.tags||[]).map(t => {
         if (t.isAward) return `<span class="tag tag-${t.level||'national'}">${esc(t.text)}</span>`;
         return `<span class="tag tag-regular">${esc(t.text)}</span>`;
       }).join(' ') || '<span class="cell-muted">—</span>';
-      return `<tr>
+      const dragAttrs = canDrag
+        ? `draggable="true" ondragstart="startCompDrag(event,'${e}')" ondragover="overCompDrag(event)" ondrop="dropCompDrag(event,'${e}')" ondragend="endCompDrag(event)"`
+        : '';
+      return `<tr ${dragAttrs} class="${canDrag ? 'manual-row' : ''}" data-name="${esc(c.name)}">
+        <td>
+          ${canDrag ? '<span class="drag-handle" title="Drag to reorder">☰</span>' : ''}
+          <input type="checkbox" class="checkbox comp-check" value="${esc(c.name)}" onclick="updateSelection(event)">
+        </td>
         <td class="cell-name">${esc(c.name)}</td>
         <td>
           <select class="status-select" onchange="setStatus('${e}', this.value)">
@@ -848,6 +1872,88 @@
           </div>
         </td>
       </tr>`;
+    }
+
+    function startCompDrag(event, encodedName) {
+      draggedCompName = decodeURIComponent(encodedName);
+      event.currentTarget.classList.add('dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', name);
+    }
+
+    function overCompDrag(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      const row = event.currentTarget;
+      if (!row.classList.contains('manual-row') || row.dataset.name === draggedCompName) return;
+      document.querySelectorAll('.manual-row.drag-over').forEach(el => el.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    }
+
+    async function dropCompDrag(event, encodedTargetName) {
+      event.preventDefault();
+      document.querySelectorAll('.manual-row.drag-over').forEach(el => el.classList.remove('drag-over'));
+      const targetName = decodeURIComponent(encodedTargetName);
+      if (!draggedCompName || draggedCompName === targetName) return;
+      const ordered = comps.slice().sort((a,b) => (a.order ?? 999999) - (b.order ?? 999999));
+      const from = ordered.findIndex(c => c.name === draggedCompName);
+      const to = ordered.findIndex(c => c.name === targetName);
+      if (from < 0 || to < 0) return;
+      const [moved] = ordered.splice(from, 1);
+      ordered.splice(to, 0, moved);
+      const names = ordered.map(c => c.name);
+      const res = await fetch('/api/competitions/order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ names })
+      });
+      if (!res.ok) {
+        toast('Failed to save order', 'error');
+        return;
+      }
+      comps = comps.map(c => ({ ...c, order: names.indexOf(c.name) }));
+      toast('Order saved', 'success');
+      renderComps();
+    }
+
+    function endCompDrag(event) {
+      draggedCompName = '';
+      event.currentTarget.classList.remove('dragging');
+      document.querySelectorAll('.manual-row.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+
+    function getSelectedComps() {
+      return Array.from(document.querySelectorAll('.comp-check:checked')).map(cb => cb.value);
+    }
+    function updateSelection(e) {
+      e.stopPropagation();
+      const selected = getSelectedComps();
+      $('selectAll').checked = selected.length > 0 && selected.length === document.querySelectorAll('.comp-check').length;
+      $('bulkCount').textContent = selected.length + ' selected';
+      $('bulkBar').classList.toggle('active', selected.length > 0);
+    }
+    function toggleSelectAll() {
+      const checked = $('selectAll').checked;
+      document.querySelectorAll('.comp-check').forEach(cb => cb.checked = checked);
+      const selected = getSelectedComps();
+      $('bulkCount').textContent = selected.length + ' selected';
+      $('bulkBar').classList.toggle('active', selected.length > 0);
+    }
+    function clearSelection() {
+      document.querySelectorAll('.comp-check').forEach(cb => cb.checked = false);
+      $('selectAll').checked = false;
+      $('bulkCount').textContent = '0 selected';
+      $('bulkBar').classList.remove('active');
+    }
+    function askBulkDelete() {
+      const selected = getSelectedComps();
+      if (!selected.length) return;
+      confirmAction = { kind: 'bulk', encs: selected };
+      $('confirmHeading').textContent = 'Delete Competitions';
+      $('confirmTitle').textContent = 'This action cannot be undone';
+      $('confirmDesc').textContent = 'All selected competitions, their files, papers, and metadata will be permanently removed.';
+      $('confirmName').textContent = selected.length + ' competitions';
+      $('confirmOverlay').classList.add('active');
     }
 
     async function setStatus(e, status) {
@@ -922,7 +2028,9 @@
         <div class="file-name ${f.isDir?'dir':''}">${icon(f.isDir)}<span>${esc(f.path)}</span></div>
         <div class="file-meta">
           <span class="file-size">${f.isDir ? '—' : fmtBytes(f.size)}</span>
-          ${f.isDir ? '' : `<button class="btn-icon danger" title="Delete file" onclick="askDeleteFile('${currentFileComp}','${enc(f.path)}','${esc(f.path)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`}
+          ${f.isDir ? '' : `<a class="btn-icon" title="Download file" href="/api/competitions/${currentFileComp}/files/${enc(f.path)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>
+            <button class="btn-icon" title="Rename file" onclick="openRename('${currentFileComp}','${enc(f.path)}','${esc(f.path)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="btn-icon danger" title="Delete file" onclick="askDeleteFile('${currentFileComp}','${enc(f.path)}','${esc(f.path)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`}
         </div>
       </div>`;
       area.innerHTML = rowList([...dirs, ...regular], row);
@@ -936,6 +2044,25 @@
       $('confirmDesc').textContent = '';
       $('confirmName').textContent = pathDisplay;
       $('confirmOverlay').classList.add('active');
+    }
+
+    function openRename(compEnc, pathEnc, pathDisplay) {
+      renameAction = { compEnc, pathEnc };
+      $('renameNewPath').value = pathDisplay;
+      $('renameOverlay').classList.add('active');
+      setTimeout(() => $('renameNewPath').focus(), 80);
+    }
+    function closeRename() { $('renameOverlay').classList.remove('active'); renameAction = null; }
+    async function submitRename() {
+      const a = renameAction; if (!a) return;
+      const newPath = $('renameNewPath').value.trim();
+      if (!newPath) { toast('Path cannot be empty', 'error'); return; }
+      const res = await fetch(`/api/competitions/${a.compEnc}/files/${a.pathEnc}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ newPath })
+      });
+      if (!res.ok) { toast('Failed to rename', 'error'); return; }
+      closeRename(); toast('File renamed', 'success'); await loadFiles();
     }
 
     async function uploadToSelected(input) {
@@ -952,6 +2079,45 @@
       populateFileSelect(); $('fileCompSelect').value = currentFileComp;
     }
 
+    function handleFilePickerDragOver(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (!currentFileComp) return;
+      $('fileDropZone').classList.add('drop-active');
+    }
+    function handleFilePickerDragLeave(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (!e.currentTarget.contains(e.relatedTarget)) $('fileDropZone').classList.remove('drop-active');
+    }
+    function handleFilePickerDrop(e) {
+      e.preventDefault(); e.stopPropagation();
+      $('fileDropZone').classList.remove('drop-active');
+      const files = e.dataTransfer.files;
+      if (!files.length) return;
+      if (!currentFileComp) { toast('Select a competition first', 'error'); return; }
+      const input = document.querySelector('#fileUploadLabel input');
+      const dt = new DataTransfer(); dt.items.add(files[0]);
+      input.files = dt.files;
+      uploadToSelected(input);
+    }
+
+    function handleCreateDragOver(e) {
+      e.preventDefault(); e.stopPropagation();
+      $('createDropZone').classList.add('drop-active');
+    }
+    function handleCreateDragLeave(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (!e.currentTarget.contains(e.relatedTarget)) $('createDropZone').classList.remove('drop-active');
+    }
+    function handleCreateDrop(e) {
+      e.preventDefault(); e.stopPropagation();
+      $('createDropZone').classList.remove('drop-active');
+      const files = e.dataTransfer.files; if (!files.length) return;
+      const input = document.querySelector('#createDropZone input');
+      const dt = new DataTransfer(); dt.items.add(files[0]);
+      input.files = dt.files;
+      $('createUploadText').textContent = files[0].name;
+    }
+
     // ---- confirm runner ----
     async function runConfirm() {
       const a = confirmAction; closeConfirm();
@@ -964,6 +2130,14 @@
         const res = await fetch(`/api/competitions/${a.compEnc}/files/${a.pathEnc}`, { method:'DELETE' });
         if (!res.ok) { toast('Failed to delete file', 'error'); return; }
         toast('File deleted', 'success'); await loadFiles();
+      } else if (a.kind === 'bulk') {
+        const res = await fetch('/api/competitions/bulk-delete', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ names: a.encs })
+        });
+        if (!res.ok) { toast('Failed to delete competitions', 'error'); return; }
+        clearSelection();
+        toast('Competitions deleted', 'success'); await loadAll();
       }
     }
     function closeConfirm() { $('confirmOverlay').classList.remove('active'); confirmAction = null; }
@@ -997,6 +2171,20 @@
       setTimeout(() => window.location.href = '/', 1200);
     }
 
+    async function restoreMetadata(input) {
+      if (!input.files.length) return;
+      const file = input.files[0];
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/backup/metadata', {
+        method: 'POST', body: fd
+      });
+      input.value = '';
+      if (!res.ok) { toast('Failed to restore metadata', 'error'); return; }
+      toast('Metadata restored', 'success');
+      window.location.reload();
+    }
+
     async function logout() {
       await fetch('/api/logout', { method:'POST' });
       window.location.href = '/';
@@ -1005,13 +2193,14 @@
     // ---- wire ----
     document.addEventListener('click', (e) => {
       if (e.target.closest('.modal-overlay') && e.target === e.currentTarget) {
-        closeCreate(); closeConfirm();
+        closeCreate(); closeConfirm(); closeRename();
       }
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { closeCreate(); closeConfirm(); closeSidebar(); }
+      if (e.key === 'Escape') { closeCreate(); closeConfirm(); closeRename(); closeSidebar(); }
     });
     $('createName') && $('createName').addEventListener('keydown', e => { if (e.key === 'Enter') submitCreate(); });
+    $('renameNewPath') && $('renameNewPath').addEventListener('keydown', e => { if (e.key === 'Enter') submitRename(); });
 
     (async () => {
       const ok = await guard();

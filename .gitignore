@@ -1,15 +1,9 @@
-# Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-paper-server
-paper-server-linux
-paper-server~
-*.test
-*.out
-go.sum
+# Rust
+target/
+dist/
+
+# Runtime paper data
+src/
 
 # Config with secrets
 config.json
