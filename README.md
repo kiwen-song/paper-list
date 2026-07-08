@@ -21,7 +21,7 @@ A lightweight web application for managing and browsing mathematical modeling co
 
 ```bash
 # Clone the repo
-git clone https://github.com/<your-username>/paper-list.git
+git clone https://github.com/kiwen-song/paper-list.git
 cd paper-list
 
 # Build and run
